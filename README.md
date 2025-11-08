@@ -23,36 +23,20 @@ Full-stack hotel booking application built with MERN stack featuring admin dashb
 - 🏢 Hotel & room management
 - 📋 Booking tracking
 - 💰 Revenue reports
+- 🧭 Refined owner console with responsive sidebar navigation
 
 ## 📸 Screenshots
 
-![Homepage](./client/public/1.png)
-![Search](./client/public/2.png)
-
-## 🚀 Quick Start
-
-### Installation
-
-```bash
-# Clone repository
-git clone https://github.com/yasin-erkan/Hotel-Booking-System.git
-cd Hotel-Booking-System
-
-# Install frontend dependencies
-cd client
-npm install
-npm run dev
-```
-
-Frontend runs at `http://localhost:5173`
-
-### Environment Variables
-
-Create `.env` in client folder:
-
-```env
-VITE_API_URL=http://localhost:5000/api
-```
+<p align="center">
+  <img src="./client/public/home-min.png" alt="Homepage view" width="280" />
+  <img src="./client/public/destinations-min.png" alt="Destinations list" width="280" />
+  <img src="./client/public/detail-min.png" alt="Room detail" width="280" />
+</p>
+<p align="center">
+  <img src="./client/public/rooms-min.png" alt="Rooms overview" width="280" />
+  <img src="./client/public/admin-min.png" alt="Owner dashboard" width="280" />
+  <img src="./client/public/mobil-min.png" alt="Mobile layout" width="280" />
+</p>
 
 ## 📁 Project Structure
 
@@ -79,6 +63,7 @@ hotel-booking/
 - [x] TailwindCSS integration
 - [x] Mobile-responsive design
 - [x] Routing setup
+- [x] Owner dashboard layout with interactive sidebar
 
 ### 🚧 In Progress
 
@@ -86,6 +71,7 @@ hotel-booking/
 - [ ] Hotel details page
 - [ ] Booking page
 - [ ] User authentication UI
+- [ ] Owner dashboard analytics cards
 
 ### 📋 To Do (Backend)
 
@@ -96,29 +82,5 @@ hotel-booking/
 - [ ] Admin dashboard backend
 - [ ] Payment integration
 - [ ] Email notifications
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👨‍💻 Author
-
-**Yasin Erkan**  
-College Project - Full Stack MERN Hotel Booking Application
-
-GitHub: [@yasin-erkan](https://github.com/yasin-erkan)  
-Repository: [Hotel-Booking-System](https://github.com/yasin-erkan/Hotel-Booking-System)
-
----
 
 ⭐ Star this repo if you find it helpful!

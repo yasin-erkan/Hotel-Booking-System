@@ -12,7 +12,7 @@ const Hero = () => {
       </h1>
       <p className="max-w-130 mt-2 text-lg font-light">
         Luxurious Hotels, Affordable Prices & Exceptional Service for Your Next
-        Vacation. Then start planning your next getaway with us. 
+        Vacation. Then start planning your next getaway with us.
       </p>
       <form className="bg-white text-gray-500 rounded-lg px-6 py-4 mt-8 flex flex-col md:flex-row max-md:items-start gap-4 max-md:mx-auto">
         <div>

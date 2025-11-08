@@ -1,0 +1,31 @@
+<svg width="210" height="56" viewBox="0 0 210 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="stayvio-mono-marker" x1="10" y1="8" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E2E8F0"/>
+    </linearGradient>
+    <linearGradient id="stayvio-mono-wave" x1="20" y1="26" x2="32" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.94"/>
+      <stop offset="1" stop-color="#CBD5F5" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <path
+      d="M26 8c-7.18 0-13 5.742-13 12.82 0 9.98 11.298 19.004 12.033 19.61.271.224.568.33.967.33.399 0 .696-.106.967-.33.735-.606 12.033-9.63 12.033-19.61C38 13.742 33.18 8 26 8Zm0 21.466c-4.2 0-7.646-3.352-7.646-7.48 0-4.088 3.472-7.48 7.646-7.48 4.174 0 7.646 3.392 7.646 7.48 0 4.128-3.446 7.48-7.646 7.48Z"
+      fill="url(#stayvio-mono-marker)"
+    />
+    <path
+      d="M32.1 23.6c-.42-.83-1.66-1.15-2.66-.74l-2.55 1.05c-1 .41-2.24.1-2.86-.71l-.51-.66c-.61-.8-1.86-1.12-2.86-.71l-3.02 1.27a1.53 1.53 0 0 0-.84 2l.06.18c1.51 4.13 5.06 7.52 8.57 10.47.25.2.61.2.86 0 2.53-2.07 5.18-4.44 6.99-7.23.58-.94.96-1.92 1.05-2.83.08-.8-.04-1.48-.28-2.09Z"
+      fill="url(#stayvio-mono-wave)"
+    />
+    <path
+      d="M25.98 16.2c-1.01 0-1.83.8-1.83 1.79 0 .99.82 1.79 1.83 1.79 1 0 1.82-.8 1.82-1.79 0-.99-.82-1.79-1.82-1.79Z"
+      fill="#0B1120"
+      fill-opacity="0.85"
+    />
+  </g>
+  <g font-family="'Poppins','Segoe UI',sans-serif" font-size="28" font-weight="700" letter-spacing="0.035em">
+    <text x="70" y="36" fill="#FFFFFF">StayVio</text>
+  </g>
+</svg>
+
