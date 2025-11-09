@@ -12,12 +12,19 @@ connectDB();
 const app = express();
 app.use(cors());
 
-// Clerk webhook must receive raw body for signature verification
-app.post('/api/clerk', express.raw({type: 'application/json'}), clerkWebhooks);
-
-//middleware
-app.use(express.json());
+// middleware
+app.use(express.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 app.use(clerkMiddleware());
+
+// Clerk webhook must receive raw body for signature verification
+app.post('/api/clerk', express.raw({type: 'application/json'}), (req, res, next) => {
+  req.rawBody = req.body;
+  next();
+}, clerkWebhooks);
 
 const HEALTH_MESSAGE = 'API is working perfectly';
 

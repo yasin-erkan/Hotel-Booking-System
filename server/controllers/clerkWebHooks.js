@@ -3,6 +3,12 @@ import {Webhook} from 'svix';
 
 const clerkWebhooks = async (req, res) => {
   try {
+    if (req.method !== 'POST') {
+      return res
+        .status(405)
+        .json({success: false, message: 'Method Not Allowed'});
+    }
+
     if (!process.env.CLERK_WEBHOOK_SECRET_KEY) {
       throw new Error('CLERK_WEBHOOK_SECRET_KEY env var missing');
     }
@@ -29,11 +35,14 @@ const clerkWebhooks = async (req, res) => {
     }
 
     //verifying headers
-    const payload =
-      typeof req.body === 'string'
-        ? req.body
-        : Buffer.from(req.body).toString('utf8');
-    const event = await webhook.verify(payload, headers);
+    const payloadBuffer = Buffer.isBuffer(req.rawBody)
+      ? req.rawBody
+      : Buffer.isBuffer(req.body)
+      ? req.body
+      : Buffer.from(
+          typeof req.body === 'string' ? req.body : JSON.stringify(req.body),
+        );
+    const event = await webhook.verify(payloadBuffer, headers);
 
     // getting data from request body
     const {data, type} = event;
@@ -48,14 +57,13 @@ const clerkWebhooks = async (req, res) => {
         }`.trim();
         const image = data?.image_url ?? data?.profile_image_url ?? '';
 
-        if (!email) {
-          throw new Error(`Missing email for Clerk event: ${type}`);
-        }
-
         const userData = {
           _id: data.id,
-          email,
-          username: username || data?.username || email.split('@')[0],
+          email: email || `${data.id}@clerk.local`,
+          username:
+            username ||
+            data?.username ||
+            (email ? email.split('@')[0] : data.id),
           image,
         };
 
