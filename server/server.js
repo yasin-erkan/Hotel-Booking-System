@@ -19,7 +19,10 @@ app.use(clerkMiddleware());
 //API to listenClerk Webhook
 app.use('/api/clerk', clerkWebhooks);
 
-app.get('/', (req, res) => res.send('API is working perfectly'));
+const HEALTH_MESSAGE = 'API is working perfectly';
+
+app.get('/', (req, res) => res.send(HEALTH_MESSAGE));
+app.get('/api/index', (req, res) => res.send(HEALTH_MESSAGE));
 
 const PORT = process.env.PORT || 3000;
 
