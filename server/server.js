@@ -23,4 +23,8 @@ app.get('/', (req, res) => res.send('API is working perfectly'));
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => console.log(`Server is running on port  ${PORT}`));
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+}
+
+export default app;
