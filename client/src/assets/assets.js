@@ -178,8 +178,8 @@ export const roomCommonData = [
 // User Dummy Data
 export const userDummyData = {
   _id: 'user_2unqyL4diJFP1E3pIBnasc7w8hP',
-  username: 'Great Stack',
-  email: 'user.greatstack@gmail.com',
+  username: 'John Doe',
+  email: 'yasinerkan@gmail.com',
   image:
     'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvdXBsb2FkZWQvaW1nXzJ2N2c5YVpSSEFVYVUxbmVYZ2JkSVVuWnFzWSJ9',
   role: 'hotelOwner',
@@ -265,7 +265,7 @@ export const userBookingsDummyData = [
     checkOutDate: '2025-05-01T00:00:00.000Z',
     totalPrice: 299,
     guests: 1,
-    status: 'pending',
+    status: 'confirmed',
     paymentMethod: 'Stripe',
     isPaid: true,
     createdAt: '2025-04-10T06:42:01.529Z',
@@ -307,10 +307,35 @@ export const userBookingsDummyData = [
 ];
 
 // Dashboard Dummy Data
+const formatBookingDate = isoDate =>
+  new Date(isoDate).toLocaleDateString('en-US', {
+    month: 'short',
+    day: '2-digit',
+    year: 'numeric',
+  });
+
+const normalizeStatus = status =>
+  status === 'pending'
+    ? 'Pending'
+    : status === 'confirmed'
+    ? 'Confirmed'
+    : status === 'cancelled'
+    ? 'Cancelled'
+    : status;
+
 export const dashboardDummyData = {
   totalBookings: 3,
   totalRevenue: 897,
   bookings: userBookingsDummyData,
+  recentBookings: userBookingsDummyData.slice(0, 3).map(booking => ({
+    id: booking._id,
+    guestName: booking.user.username,
+    roomName: booking.room.roomType,
+    checkIn: formatBookingDate(booking.checkInDate),
+    checkOut: formatBookingDate(booking.checkOutDate),
+    amount: booking.totalPrice,
+    status: normalizeStatus(booking.status),
+  })),
 };
 
 // --------- SVG code for Book Icon------

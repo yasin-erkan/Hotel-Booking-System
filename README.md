@@ -13,17 +13,17 @@ Full-stack hotel booking application built with MERN stack featuring admin dashb
 
 - 🔍 Search hotels by destination, dates, and guests
 - 🏨 Browse hotels and rooms with detailed info
-- 💳 Secure booking system
-- 👤 User authentication
-- 📱 Fully responsive design
+- 💳 Secure booking system UI flows
+- 👤 User authentication (Clerk)
+- 📱 Fully responsive design across desktop, tablet, mobile
 
 ### Admin Dashboard
 
-- 📊 Analytics and statistics
-- 🏢 Hotel & room management
-- 📋 Booking tracking
-- 💰 Revenue reports
-- 🧭 Refined owner console with responsive sidebar navigation
+- 📊 Dashboard with revenue + booking analytics
+- 🏢 Add / edit / list rooms with media uploads
+- 📋 Booking tracking table with status toggles
+- 💰 Pricing chips, inventory badges, actionable CTAs
+- 🧭 Owner console layout with sticky navbar + glass sidebar
 
 ## 📸 Screenshots
 
@@ -34,8 +34,13 @@ Full-stack hotel booking application built with MERN stack featuring admin dashb
 </p>
 <p align="center">
   <img src="./client/public/rooms-min.png" alt="Rooms overview" width="280" />
-  <img src="./client/public/admin-min.png" alt="Owner dashboard" width="280" />
+  <img src="./client/public/roomList-min.png" alt="Room list management" width="280" />
+  <img src="./client/public/dashboard-min.png" alt="Owner analytics dashboard" width="280" />
+</p>
+<p align="center">
+  <img src="./client/public/admin-min.png" alt="Owner console navigation" width="280" />
   <img src="./client/public/mobil-min.png" alt="Mobile layout" width="280" />
+  <img src="./client/public/reg-min.png" alt="User registration" width="280" />
 </p>
 
 ## 📁 Project Structure
@@ -57,21 +62,19 @@ hotel-booking/
 
 ### ✅ Completed (Frontend)
 
-- [x] Project setup with Vite + React
-- [x] Responsive Navbar with scroll effects
-- [x] Hero section with search form
-- [x] TailwindCSS integration
-- [x] Mobile-responsive design
-- [x] Routing setup
-- [x] Owner dashboard layout with interactive sidebar
+- [x] Vite + React 19 setup with Tailwind 4
+- [x] Global theming, typography, spacing tokens
+- [x] End-to-end responsive marketing pages
+- [x] Auth flows wired to Clerk components
+- [x] Owner dashboard analytics + bookings table
+- [x] Owner Add Room media form + amenities builder
+- [x] Owner List Room grid/table hybrid with filters
+- [x] Shared layout: sticky navbar, glass sidebar, contextual footer
 
 ### 🚧 In Progress
 
-- [ ] Hotel listing page
-- [ ] Hotel details page
-- [ ] Booking page
-- [ ] User authentication UI
-- [ ] Owner dashboard analytics cards
+- [ ] Server integration for dynamic data
+- [ ] Booking confirmation flow wiring to backend
 
 ### 📋 To Do (Backend)
 
