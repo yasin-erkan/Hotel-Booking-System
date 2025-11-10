@@ -3,8 +3,13 @@ import {Webhook} from 'svix';
 import {ensureConnection} from '../configs/db.js';
 import mongoose from 'mongoose';
 
+// Version marker to verify deployed code
+const WEBHOOK_VERSION = 'v2.0.0-no-email-validation';
+
 const clerkWebhooks = async (req, res) => {
   try {
+    console.log(`[${WEBHOOK_VERSION}] Clerk webhook handler started`);
+
     if (req.method !== 'POST') {
       return res
         .status(405)
@@ -49,11 +54,16 @@ const clerkWebhooks = async (req, res) => {
     // getting data from request body
     const {data, type} = event;
 
-    console.log(`Received Clerk webhook event: ${type}`, {
+    console.log(`[${WEBHOOK_VERSION}] Received Clerk webhook event: ${type}`, {
       userId: data?.id,
       hasEmail: !!data?.email_addresses?.[0]?.email_address,
       emailAddresses: data?.email_addresses?.length || 0,
     });
+
+    // CRITICAL: This version does NOT validate email - it always uses fallback
+    console.log(
+      `[${WEBHOOK_VERSION}] Email validation is DISABLED - using fallback if needed`,
+    );
 
     // Ensure MongoDB connection before operations (with retry)
     try {
