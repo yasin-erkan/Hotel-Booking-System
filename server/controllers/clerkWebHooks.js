@@ -81,7 +81,10 @@ const clerkWebhooks = async (req, res) => {
     switch (type) {
       case 'user.created':
       case 'user.updated': {
-        // Extract email from various possible locations
+        // Log full data for debugging
+        console.log('Full Clerk event data:', JSON.stringify(data, null, 2));
+
+        // Extract email from various possible locations - NEVER throw error if missing
         const email =
           data?.email_addresses?.[0]?.email_address ??
           data?.email_address ??
@@ -92,18 +95,20 @@ const clerkWebhooks = async (req, res) => {
         const firstName = data?.first_name || '';
         const lastName = data?.last_name || '';
         const username =
-          `${firstName} ${lastName}`.trim() || data?.username || null;
+          `${firstName} ${lastName}`.trim() ||
+          data?.username ||
+          data?.id ||
+          'user';
 
         // Extract image
         const image =
           data?.image_url ?? data?.profile_image_url ?? data?.avatar_url ?? '';
 
-        // Build user data with fallbacks
+        // Build user data with fallbacks - ALWAYS provide email fallback
         const userData = {
           _id: data.id,
           email: email || `${data.id}@clerk.local`,
-          username:
-            username || (email ? email.split('@')[0] : data.id) || data.id,
+          username: username || data.id,
           image: image || '',
           role: data?.role || 'user',
         };
@@ -112,6 +117,7 @@ const clerkWebhooks = async (req, res) => {
           id: userData._id,
           email: userData.email,
           username: userData.username,
+          hasOriginalEmail: !!email,
         });
 
         await User.findByIdAndUpdate(
