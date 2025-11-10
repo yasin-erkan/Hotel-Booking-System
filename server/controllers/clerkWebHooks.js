@@ -1,5 +1,7 @@
 import User from '../models/User.js';
 import {Webhook} from 'svix';
+import {ensureConnection} from '../configs/db.js';
+import mongoose from 'mongoose';
 
 const clerkWebhooks = async (req, res) => {
   try {
@@ -47,35 +49,82 @@ const clerkWebhooks = async (req, res) => {
     // getting data from request body
     const {data, type} = event;
 
+    console.log(`Received Clerk webhook event: ${type}`, {
+      userId: data?.id,
+      hasEmail: !!data?.email_addresses?.[0]?.email_address,
+      emailAddresses: data?.email_addresses?.length || 0,
+    });
+
+    // Ensure MongoDB connection before operations (with retry)
+    try {
+      await ensureConnection(3);
+    } catch (error) {
+      console.error('MongoDB connection failed:', error.message);
+      throw new Error(`Database connection failed: ${error.message}`);
+    }
+
+    // Final connection state check
+    const connectionState = mongoose.connection.readyState;
+    if (connectionState !== 1) {
+      const stateMap = {
+        0: 'disconnected',
+        2: 'connecting',
+        3: 'disconnecting',
+      };
+      throw new Error(
+        `MongoDB connection not ready. State: ${
+          stateMap[connectionState] || connectionState
+        }`,
+      );
+    }
+
     switch (type) {
       case 'user.created':
       case 'user.updated': {
+        // Extract email from various possible locations
         const email =
-          data?.email_addresses?.[0]?.email_address ?? data?.email_address;
-        const username = `${data?.first_name ?? ''} ${
-          data?.last_name ?? ''
-        }`.trim();
-        const image = data?.image_url ?? data?.profile_image_url ?? '';
+          data?.email_addresses?.[0]?.email_address ??
+          data?.email_address ??
+          data?.primary_email_address_id ??
+          null;
 
+        // Extract username
+        const firstName = data?.first_name || '';
+        const lastName = data?.last_name || '';
+        const username =
+          `${firstName} ${lastName}`.trim() || data?.username || null;
+
+        // Extract image
+        const image =
+          data?.image_url ?? data?.profile_image_url ?? data?.avatar_url ?? '';
+
+        // Build user data with fallbacks
         const userData = {
           _id: data.id,
           email: email || `${data.id}@clerk.local`,
           username:
-            username ||
-            data?.username ||
-            (email ? email.split('@')[0] : data.id),
-          image,
+            username || (email ? email.split('@')[0] : data.id) || data.id,
+          image: image || '',
+          role: data?.role || 'user',
         };
+
+        console.log(`Saving user to MongoDB:`, {
+          id: userData._id,
+          email: userData.email,
+          username: userData.username,
+        });
 
         await User.findByIdAndUpdate(
           data.id,
           {$set: userData},
           {upsert: true, new: true, setDefaultsOnInsert: true},
         );
+        console.log(`User ${data.id} saved to MongoDB successfully`);
         break;
       }
       case 'user.deleted': {
         await User.findByIdAndDelete(data.id);
+        console.log(`User ${data.id} deleted from MongoDB`);
         break;
       }
       default:

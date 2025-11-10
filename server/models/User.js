@@ -4,8 +4,8 @@ const userSchema = mongoose.Schema(
   {
     _id: {type: String, required: true},
     username: {type: String, required: true},
-    email: {type: String},
-    image: {type: String, required: true},
+    email: {type: String, required: false},
+    image: {type: String, required: false, default: ''},
     role: {type: String, enum: ['user', 'hotelOwner'], default: 'user'},
     recentSearchedCities: {
       type: [String],
