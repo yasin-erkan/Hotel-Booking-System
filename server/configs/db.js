@@ -88,7 +88,6 @@ async function connectDB() {
       const opts = {
         dbName: MONGODB_DB,
         bufferCommands: false, // Disable mongoose buffering - CRITICAL for serverless
-        bufferMaxEntries: 0, // Disable mongoose buffering - CRITICAL for serverless
         maxPoolSize: 1, // Reduce pool size for serverless (reuse connection)
         minPoolSize: 0, // Allow connection to close when idle
         serverSelectionTimeoutMS: 30000, // Increase to 30 seconds
