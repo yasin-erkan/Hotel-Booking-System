@@ -5,7 +5,7 @@ Full-stack hotel booking application built with MERN stack featuring admin dashb
 ## 🛠️ Tech Stack
 
 **Frontend:** React 19.1, React Router, TailwindCSS 4.1, Vite  
-**Backend:** Node.js, Express.js, MongoDB, Mongoose (Coming Soon)
+**Backend:** Node.js, Express.js, MongoDB, Mongoose, Clerk Authentication
 
 ## ✨ Features
 
@@ -52,10 +52,13 @@ hotel-booking/
 │   │   ├── components/  # Navbar, Hero, etc.
 │   │   ├── pages/       # Home, Hotels, etc.
 │   │   └── assets/      # Images & icons
-└── server/              # Express backend (Coming Soon)
-    ├── models/
-    ├── routes/
-    └── controllers/
+└── server/              # Express backend
+    ├── configs/         # Database & Cloudinary config
+    ├── controllers/      # Business logic
+    ├── middleware/      # Auth & upload middleware
+    ├── models/           # MongoDB schemas
+    ├── routes/           # API routes
+    └── server.js         # Express app entry point
 ```
 
 ## 🎯 Implementation Status
@@ -71,19 +74,112 @@ hotel-booking/
 - [x] Owner List Room grid/table hybrid with filters
 - [x] Shared layout: sticky navbar, glass sidebar, contextual footer
 
+### ✅ Completed (Backend)
+
+- [x] Express server setup with Vercel serverless support
+- [x] MongoDB connection with Mongoose
+- [x] Clerk webhook integration for user sync
+- [x] User authentication middleware
+- [x] REST API endpoints (User, Hotel, Room)
+- [x] Cloudinary integration for image uploads
+- [x] MongoDB models (User, Hotel, Room)
+
 ### 🚧 In Progress
 
-- [ ] Server integration for dynamic data
 - [ ] Booking confirmation flow wiring to backend
-
-### 📋 To Do (Backend)
-
-- [ ] Express server setup
-- [ ] MongoDB database schema
-- [ ] REST API endpoints
-- [ ] JWT authentication
-- [ ] Admin dashboard backend
 - [ ] Payment integration
 - [ ] Email notifications
+
+### 📋 To Do
+
+- [ ] Booking model and endpoints
+- [ ] Search and filter functionality
+- [ ] Admin dashboard backend integration
+- [ ] Real-time booking updates
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- MongoDB Atlas account
+- Clerk account (for authentication)
+- Cloudinary account (for image uploads)
+
+### Installation
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/yasin-erkan/Hotel-Booking-System.git
+cd Hotel-Booking-System
+```
+
+2. Install dependencies
+
+```bash
+# Frontend
+cd client
+npm install
+
+# Backend
+cd ../server
+npm install
+```
+
+3. Environment Variables
+
+**Backend (.env in server/)**
+
+```env
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net
+MONGODB_DB=Hoteluxe
+CLERK_WEBHOOK_SECRET_KEY=whsec_...
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+**Frontend (.env in client/)**
+
+```env
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+```
+
+4. Run the application
+
+```bash
+# Backend (from server/)
+npm run dev
+
+# Frontend (from client/)
+npm run dev
+```
+
+## 📡 API Endpoints
+
+### User Routes (`/api/user`)
+
+- `GET /api/user` - Get user data (protected)
+- `POST /api/user/store-recent-search` - Store recent searched cities (protected)
+
+### Hotel Routes (`/api/hotels`)
+
+- `POST /api/hotels` - Register new hotel (protected)
+
+### Clerk Webhook
+
+- `POST /api/clerk` - Clerk webhook for user sync
+
+## 🚢 Deployment
+
+### Vercel
+
+Backend and frontend are deployed separately on Vercel:
+
+- Backend: Uses `server/vercel.json` configuration
+- Frontend: Uses `client/vercel.json` configuration
+
+Make sure to set all environment variables in Vercel dashboard.
 
 ⭐ Star this repo if you find it helpful!
