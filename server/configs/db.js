@@ -1,7 +1,16 @@
 import mongoose from 'mongoose';
 
 // Support both MONGODB_URI and MONGO_URI for flexibility
-const MONGODB_URI = (process.env.MONGODB_URI || process.env.MONGO_URI)?.trim();
+let MONGODB_URI = (process.env.MONGODB_URI || process.env.MONGO_URI)?.trim();
+
+// Fix common mistake: remove "MONGODB_URI=" prefix if present
+if (MONGODB_URI && MONGODB_URI.startsWith('MONGODB_URI=')) {
+  MONGODB_URI = MONGODB_URI.replace(/^MONGODB_URI=/, '').trim();
+}
+if (MONGODB_URI && MONGODB_URI.startsWith('MONGO_URI=')) {
+  MONGODB_URI = MONGODB_URI.replace(/^MONGO_URI=/, '').trim();
+}
+
 const MONGODB_DB = process.env.MONGODB_DB || 'Hoteluxe';
 
 // Cache the connection to reuse across serverless function invocations
