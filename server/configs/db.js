@@ -57,11 +57,21 @@ async function connectDB() {
     try {
       // Close existing connection if disconnected
       if (mongoose.connection.readyState !== 0) {
+        console.log('Closing existing MongoDB connection...');
         await mongoose.connection.close();
       }
 
       // Build connection string (trim and clean)
       let connectionString = MONGODB_URI.trim();
+
+      // Log connection string (masked for security)
+      const maskedUri = connectionString.replace(
+        /mongodb\+srv:\/\/([^:]+):([^@]+)@/,
+        'mongodb+srv://***:***@',
+      );
+      console.log(`MongoDB connection string: ${maskedUri}`);
+      console.log(`Target database: ${MONGODB_DB}`);
+
       if (!connectionString.includes('?')) {
         connectionString = `${connectionString}?retryWrites=true&w=majority`;
       }
@@ -79,8 +89,21 @@ async function connectDB() {
         family: 4, // Use IPv4, skip trying IPv6
       };
 
-      console.log(`Connecting to MongoDB: ${MONGODB_DB}`);
+      console.log(
+        `Attempting MongoDB connection to database: ${MONGODB_DB}...`,
+      );
+      console.log('Connection options:', {
+        serverSelectionTimeoutMS: opts.serverSelectionTimeoutMS,
+        socketTimeoutMS: opts.socketTimeoutMS,
+        connectTimeoutMS: opts.connectTimeoutMS,
+        bufferCommands: opts.bufferCommands,
+      });
+
+      const startTime = Date.now();
       await mongoose.connect(connectionString, opts);
+      const connectionTime = Date.now() - startTime;
+
+      console.log(`MongoDB connection established in ${connectionTime}ms`);
 
       cached.conn = mongoose.connection;
       console.log(`MongoDB connected successfully to database: ${MONGODB_DB}`);
@@ -88,7 +111,32 @@ async function connectDB() {
       return cached.conn;
     } catch (error) {
       cached.promise = null;
-      console.error('MongoDB connection error:', error.message);
+      console.error('MongoDB connection error details:', {
+        name: error.name,
+        message: error.message,
+        code: error.code,
+        reason: error.reason?.message,
+        stack: error.stack?.substring(0, 500),
+      });
+
+      // Provide more specific error messages
+      if (error.message?.includes('authentication failed')) {
+        throw new Error(
+          'MongoDB authentication failed. Please check: 1) Database username and password are correct, 2) Database user has proper permissions.',
+        );
+      } else if (error.message?.includes('timeout')) {
+        throw new Error(
+          `MongoDB connection timeout. Please check: 1) Network Access allows 0.0.0.0/0, 2) Connection string is correct, 3) MongoDB Atlas cluster is running. Error: ${error.message}`,
+        );
+      } else if (
+        error.message?.includes('ENOTFOUND') ||
+        error.message?.includes('getaddrinfo')
+      ) {
+        throw new Error(
+          `MongoDB host not found. Please check connection string. Error: ${error.message}`,
+        );
+      }
+
       throw error;
     }
   })();
