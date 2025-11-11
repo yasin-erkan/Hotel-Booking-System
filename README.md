@@ -54,11 +54,11 @@ hotel-booking/
 │   │   └── assets/      # Images & icons
 └── server/              # Express backend
     ├── configs/         # Database & Cloudinary config
-    ├── controllers/      # Business logic
+    ├── controllers/     # Business logic (user, hotel, room, booking)
     ├── middleware/      # Auth & upload middleware
-    ├── models/           # MongoDB schemas
-    ├── routes/           # API routes
-    └── server.js         # Express app entry point
+    ├── models/          # MongoDB schemas (User, Hotel, Room, Booking)
+    ├── routes/          # API routes (user, hotel, room, booking)
+    └── server.js        # Express app entry point
 ```
 
 ## 🎯 Implementation Status
@@ -80,22 +80,27 @@ hotel-booking/
 - [x] MongoDB connection with Mongoose
 - [x] Clerk webhook integration for user sync
 - [x] User authentication middleware
-- [x] REST API endpoints (User, Hotel, Room)
+- [x] REST API endpoints (User, Hotel, Room, Booking)
 - [x] Cloudinary integration for image uploads
-- [x] MongoDB models (User, Hotel, Room)
+- [x] MongoDB models (User, Hotel, Room, Booking)
+- [x] Booking availability checking
+- [x] Booking creation with price calculation
+- [x] User bookings retrieval
+- [x] Hotel owner bookings dashboard with revenue analytics
 
 ### 🚧 In Progress
 
-- [ ] Booking confirmation flow wiring to backend
 - [ ] Payment integration
 - [ ] Email notifications
+- [ ] Search and filter functionality
+- [ ] Real-time booking updates
 
 ### 📋 To Do
 
-- [ ] Booking model and endpoints
-- [ ] Search and filter functionality
-- [ ] Admin dashboard backend integration
-- [ ] Real-time booking updates
+- [ ] Booking cancellation endpoint
+- [ ] Booking status update endpoint
+- [ ] Advanced search and filter functionality
+- [ ] Email notifications for bookings
 
 ## 🚀 Getting Started
 
@@ -166,6 +171,20 @@ npm run dev
 ### Hotel Routes (`/api/hotels`)
 
 - `POST /api/hotels` - Register new hotel (protected)
+
+### Room Routes (`/api/rooms`)
+
+- `GET /api/rooms` - Get all available rooms (public)
+- `POST /api/rooms` - Create new room (protected, owner only)
+- `GET /api/rooms/owner` - Get all rooms for owner's hotel (protected)
+- `POST /api/rooms/toggle-availability` - Toggle room availability (protected)
+
+### Booking Routes (`/api/bookings`)
+
+- `POST /api/bookings/check-availability` - Check room availability
+- `POST /api/bookings/book` - Create new booking (protected)
+- `GET /api/bookings/user` - Get user's bookings (protected)
+- `GET /api/bookings/hotel` - Get hotel bookings with analytics (protected, owner only)
 
 ### Clerk Webhook
 
