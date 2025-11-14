@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import {assets} from '../assets/assets';
-import {useClerk, useUser, UserButton} from '@clerk/clerk-react';
-import {useNavigate, useLocation} from 'react-router-dom';
+import {useClerk, UserButton} from '@clerk/clerk-react';
+import {useLocation} from 'react-router-dom';
+import {useAppContext} from '../context/AppContext';
 
 const BookIcon = () => (
   <svg
@@ -37,8 +38,7 @@ const Navbar = () => {
   );
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const {openSignIn} = useClerk();
-  const {user} = useUser();
-  const navigate = useNavigate();
+  const {user, navigate, isOwner, setShowHotelReg} = useAppContext();
 
   useEffect(() => {
     setIsScrolled(location.pathname !== '/' || window.scrollY > 10);
@@ -51,6 +51,19 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [location.pathname]);
+  const hostCtaLabel = isOwner ? 'Dashboard' : 'List Your Hotel';
+  const handleHostCta = () => {
+    if (!user) {
+      openSignIn();
+      return;
+    }
+    if (isOwner) {
+      navigate('/owner');
+    } else {
+      setShowHotelReg(true);
+    }
+  };
+
   return (
     <nav
       className={`fixed top-0 left-0 z-50 flex w-full items-center justify-between px-4 py-4 transition-all duration-500 md:px-16 md:py-6 lg:px-24 xl:px-32 ${
@@ -84,13 +97,15 @@ const Navbar = () => {
             />
           </a>
         ))}
-        <button
-          className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${
-            isScrolled ? 'text-black' : 'text-white'
-          } transition-all`}
-          onClick={() => navigate('/owner')}>
-          Dashboard
-        </button>
+        {user && (
+          <button
+            className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${
+              isScrolled ? 'text-black' : 'text-white'
+            } transition-all`}
+            onClick={handleHostCta}>
+            {hostCtaLabel}
+          </button>
+        )}
       </div>
 
       {/* Desktop Right */}
@@ -167,17 +182,21 @@ const Navbar = () => {
           </a>
         ))}
 
-        {user && (
+        {user ? (
           <button
             className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all"
-            onClick={() => navigate('/owner')}>
-            Dashboard
+            onClick={() => {
+              setIsMenuOpen(false);
+              handleHostCta();
+            }}>
+            {hostCtaLabel}
           </button>
-        )}
-
-        {!user && (
+        ) : (
           <button
-            onClick={openSignIn}
+            onClick={() => {
+              setIsMenuOpen(false);
+              openSignIn();
+            }}
             className="bg-black text-white px-8 py-2.5 rounded-full transition-all duration-500">
             Login
           </button>

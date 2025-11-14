@@ -134,20 +134,22 @@ npm install
 
 3. Environment Variables
 
-**Backend (.env in server/)**
+**Backend (.env in `server/`)**
 
 ```env
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net
 MONGODB_DB=Hoteluxe
+CLERK_SECRET_KEY=sk_test_...
 CLERK_WEBHOOK_SECRET_KEY=whsec_...
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 ```
 
-**Frontend (.env in client/)**
+**Frontend (.env in `client/`)**
 
 ```env
+VITE_BACKEND_URL=http://localhost:3000
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
 ```
 
@@ -189,6 +191,12 @@ npm run dev
 ### Clerk Webhook
 
 - `POST /api/clerk` - Clerk webhook for user sync
+
+## 🧪 Troubleshooting
+
+- **`POST /api/hotels` returns 404** – ensure you are signed in via Clerk before opening the registration modal. The request passes through `protect`, which looks up the Clerk `userId` in MongoDB. Run the Clerk webhook locally (`/api/clerk`) or manually seed the user so it exists in Mongo before calling the route.
+- **Frontend can’t reach the API** – confirm `VITE_BACKEND_URL` is set and Vite was restarted after editing `.env`. Axios pulls its base URL at import time.
+- **Signature verification fails** – double-check both `CLERK_SECRET_KEY` (for middleware) and `CLERK_WEBHOOK_SECRET_KEY` (for Svix) are set in your backend environment.
 
 ## 🚢 Deployment
 

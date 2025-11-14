@@ -1,6 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import path from 'path';
+import {fileURLToPath} from 'url';
 import connectDB from './configs/db.js';
 import {clerkMiddleware} from '@clerk/express';
 import clerkWebhooks from './controllers/clerkWebHooks.js';
@@ -10,7 +12,11 @@ import connectCloudinary from './configs/cloudinary.js';
 import roomRouter from './routes/roomRoutes.js';
 import bookingRouter from './routes/bookingRoutes.js';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({path: path.resolve(__dirname, '.env')});
+dotenv.config({path: path.resolve(__dirname, '..', '.env')});
 
 connectDB().catch(err => {
   console.error('MongoDB connection error:', err.message);
