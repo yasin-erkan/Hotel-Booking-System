@@ -3,7 +3,8 @@ import {ensureConnection} from '../configs/db.js';
 
 export const protect = async (req, res, next) => {
   try {
-    const userId = req.auth?.userId;
+    const auth = req.auth ? await req.auth() : null;
+    const userId = auth?.userId;
 
     if (!userId) {
       return res.status(401).json({
@@ -14,13 +15,25 @@ export const protect = async (req, res, next) => {
 
     await ensureConnection();
 
-    const user = await User.findById(userId);
+    let user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-      });
+      // Auto-create user if webhook hasn't fired yet (fallback for local dev)
+      try {
+        user = await User.create({
+          _id: userId,
+          username: `user_${userId.slice(-8)}`,
+          email: `${userId}@clerk.local`,
+          image: '',
+          role: 'user',
+        });
+      } catch (error) {
+        // Race condition: retry find if another request created the user
+        user = await User.findById(userId);
+        if (!user) {
+          throw error;
+        }
+      }
     }
 
     req.user = user;

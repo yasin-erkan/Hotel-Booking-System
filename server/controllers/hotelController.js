@@ -4,22 +4,25 @@ import User from '../models/User.js';
 export const registerHotel = async (req, res) => {
   try {
     const {name, address, contact, city} = req.body;
-    const owner = req.body._id;
+    const owner = req.user._id;
 
-    //check if User already registered
-    const hotel = await Hotel.findOne({owner});
-    if (hotel) {
+    // Check if user already registered a hotel
+    const existingHotel = await Hotel.findOne({owner});
+    if (existingHotel) {
       return res.json({
         success: false,
         message: 'Hotel has already been registered!',
       });
-      await Hotel.create({name, address, contact, city, owner});
-      await User.findByIdAndUpdate(owner, {role: 'hotelOwner'});
-      res.json({success: true, message: 'Hotel  registered successfully!'});
     }
+
+    // Create hotel and update user role
+    await Hotel.create({name, address, contact, city, owner});
+    await User.findByIdAndUpdate(owner, {role: 'hotelOwner'});
+    
+    res.json({success: true, message: 'Hotel registered successfully!'});
   } catch (error) {
-    registerHotel.json({
-      success: true,
+    res.json({
+      success: false,
       message: error.message,
     });
   }

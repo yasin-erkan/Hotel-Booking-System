@@ -23,6 +23,12 @@ connectDB().catch(err => {
 });
 connectCloudinary();
 
+const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
+
+if (!CLERK_SECRET_KEY) {
+  console.error('CLERK_SECRET_KEY environment variable is missing');
+}
+
 const app = express();
 app.use(cors());
 app.use(
@@ -32,7 +38,12 @@ app.use(
     },
   }),
 );
-app.use(clerkMiddleware());
+// Clerk Express middleware - pass secretKey explicitly
+app.use(
+  clerkMiddleware({
+    secretKey: CLERK_SECRET_KEY,
+  }),
+);
 
 app.post(
   '/api/clerk',

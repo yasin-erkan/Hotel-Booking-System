@@ -4,8 +4,8 @@ Full-stack hotel booking application built with MERN stack featuring admin dashb
 
 ## 🛠️ Tech Stack
 
-**Frontend:** React 19.1, React Router, TailwindCSS 4.1, Vite  
-**Backend:** Node.js, Express.js, MongoDB, Mongoose, Clerk Authentication
+**Frontend:** React 19.1, React Router, TailwindCSS 4.1, Vite, React Hot Toast  
+**Backend:** Node.js, Express.js, MongoDB, Mongoose, Clerk Authentication, Cloudinary
 
 ## ✨ Features
 
@@ -69,10 +69,13 @@ hotel-booking/
 - [x] Global theming, typography, spacing tokens
 - [x] End-to-end responsive marketing pages
 - [x] Auth flows wired to Clerk components
-- [x] Owner dashboard analytics + bookings table
+- [x] Owner dashboard analytics + bookings table with real-time API integration
 - [x] Owner Add Room media form + amenities builder
 - [x] Owner List Room grid/table hybrid with filters
 - [x] Shared layout: sticky navbar, glass sidebar, contextual footer
+- [x] Dashboard data fetching with useMemo optimization
+- [x] Recent bookings display with formatted dates and status
+- [x] Revenue and booking statistics cards
 
 ### ✅ Completed (Backend)
 
@@ -192,11 +195,30 @@ npm run dev
 
 - `POST /api/clerk` - Clerk webhook for user sync
 
+## 🔄 Recent Updates
+
+### Latest Changes
+
+- **Dashboard Integration**: Connected Dashboard component to real API endpoints (`/api/bookings/hotel`) for live data
+- **Performance Optimization**: Implemented `useMemo` hooks for `overviewCards` and `recentBookings` to prevent unnecessary re-renders
+- **Data Formatting**: Added date formatting and status normalization utilities for booking display
+- **Import Path Fixes**: Standardized all AppContext imports to use extensionless paths for better Vite compatibility
+- **Vite Configuration**: Added resolve extensions (`.js`, `.jsx`, `.json`) to vite.config.js
+- **Syntax Fixes**: Fixed conditional rendering syntax in FeaturedDestination component
+
+### Technical Improvements
+
+- Replaced dummy data with real API calls in Dashboard
+- Added proper error handling for API requests
+- Implemented currency support from AppContext
+- Fixed React hooks dependencies and imports
+
 ## 🧪 Troubleshooting
 
 - **`POST /api/hotels` returns 404** – ensure you are signed in via Clerk before opening the registration modal. The request passes through `protect`, which looks up the Clerk `userId` in MongoDB. Run the Clerk webhook locally (`/api/clerk`) or manually seed the user so it exists in Mongo before calling the route.
-- **Frontend can’t reach the API** – confirm `VITE_BACKEND_URL` is set and Vite was restarted after editing `.env`. Axios pulls its base URL at import time.
+- **Frontend can't reach the API** – confirm `VITE_BACKEND_URL` is set and Vite was restarted after editing `.env`. Axios pulls its base URL at import time.
 - **Signature verification fails** – double-check both `CLERK_SECRET_KEY` (for middleware) and `CLERK_WEBHOOK_SECRET_KEY` (for Svix) are set in your backend environment.
+- **Import resolution errors** – if Vite can't resolve imports, clear the cache with `rm -rf node_modules/.vite` and restart the dev server. Ensure all imports use extensionless paths (e.g., `'../../context/AppContext'` not `'../../context/AppContext.jsx'`).
 
 ## 🚢 Deployment
 

@@ -1,4 +1,3 @@
-import upload from '../middleware/uploadMiddleware.js';
 import Hotel from '../models/Hotel.js';
 import Room from '../models/Room.js';
 import {v2 as cloudinary} from 'cloudinary';
@@ -7,7 +6,8 @@ import {v2 as cloudinary} from 'cloudinary';
 export const createRoom = async (req, res) => {
   try {
     const {roomType, pricePerNight, amenities} = req.body;
-    const hotel = await Hotel.findOne({owner: req.auth.userId});
+    const auth = await req.auth();
+    const hotel = await Hotel.findOne({owner: auth.userId});
 
     if (!hotel) {
       return res.json({success: false, message: 'No Hotel found'});
@@ -56,7 +56,8 @@ export const getRooms = async (req, res) => {
 //API to get All rooms for a definite hotel
 export const getOwnerRooms = async (req, res) => {
   try {
-    const hotelData = await Hotel.findOne({owner: req.auth.userId});
+    const auth = await req.auth();
+    const hotelData = await Hotel.findOne({owner: auth.userId});
     if (!hotelData) {
       return res.json({success: false, message: 'No hotel found'});
     }

@@ -1,9 +1,58 @@
-import React, {useState} from 'react';
-import {roomsDummyData} from '../../assets/assets';
+import React, {useState, useEffect} from 'react';
 import Title from '../../components/Title';
+import {useAppContext} from '../../context/AppContext';
+
+import toast from 'react-hot-toast';
 
 const ListRoom = () => {
-  const [rooms, setRooms] = useState(roomsDummyData);
+  const [rooms, setRooms] = useState([]);
+
+  const {axios, getToken, user} = useAppContext();
+
+  // !catch the rooms of the owner
+  const fetchRooms = async () => {
+    try {
+      const {data} = await axios.get('/api/rooms/owner', {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`,
+        },
+      });
+      if (data.success) {
+        setRooms(data.rooms);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  // ! toggle availability of the room
+  const handleToggleAvailability = async roomId => {
+    try {
+      const {data} = await axios.post(
+        '/api/rooms/toggle-availability',
+        {roomId},
+        {
+          headers: {
+            Authorization: `Bearer ${await getToken()}`,
+          },
+        },
+      );
+      if (data.success) {
+        toast.success(data.message);
+        fetchRooms();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (user) fetchRooms();
+  }, [user]);
+
   return (
     <section className="space-y-8">
       <Title
@@ -46,7 +95,7 @@ const ListRoom = () => {
         <ul className="divide-y divide-slate-100 text-sm text-slate-600">
           {rooms.map((room, index) => (
             <li
-              key={room.id ?? index}
+              key={room._id ?? index}
               className="grid grid-cols-1 gap-4 px-4 py-4 transition hover:bg-blue-50/60 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:grid-cols-[0.5fr_1.6fr_1.2fr_0.9fr_0.8fr] md:items-center md:px-6 md:py-5">
               <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-500 shadow-sm md:mx-auto">
                 {String(index + 1).padStart(2, '0')}
@@ -63,7 +112,7 @@ const ListRoom = () => {
 
               <div className="sm:col-span-2 md:col-span-1 md:justify-self-center">
                 <div className="flex flex-wrap gap-2 md:justify-center">
-                  {room.amenities.map(amenity => (
+                  {room.amenities?.map(amenity => (
                     <span
                       key={amenity}
                       className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
@@ -81,22 +130,14 @@ const ListRoom = () => {
 
               <div className="flex items-center justify-start md:justify-end">
                 <label
-                  htmlFor={`toggle-room-${room.id ?? index}`}
+                  htmlFor={`toggle-room-${room._id ?? index}`}
                   className="inline-flex cursor-pointer items-center gap-3">
                   <input
-                    id={`toggle-room-${room.id ?? index}`}
+                    id={`toggle-room-${room._id ?? index}`}
                     type="checkbox"
                     className="peer sr-only"
                     checked={room.isAvailable}
-                    onChange={() =>
-                      setRooms(prev =>
-                        prev.map((item, itemIndex) =>
-                          itemIndex === index
-                            ? {...item, isAvailable: !item.isAvailable}
-                            : item,
-                        ),
-                      )
-                    }
+                    onChange={() => handleToggleAvailability(room._id)}
                   />
                   <span className="relative inline-flex h-7 w-12 items-center rounded-full bg-slate-200 transition-colors duration-200 peer-checked:bg-blue-500">
                     <span className="absolute left-1 h-5 w-5 rounded-full bg-white transition-transform duration-200 ease-in-out peer-checked:translate-x-5" />

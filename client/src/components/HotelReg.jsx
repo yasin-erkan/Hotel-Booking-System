@@ -5,7 +5,8 @@ import {useAppContext} from '../context/AppContext';
 import {toast} from 'react-hot-toast';
 
 const HotelReg = () => {
-  const {setShowHotelReg, axios, getToken, setIsOwner} = useAppContext();
+  const {setShowHotelReg, axios, getToken, setIsOwner, navigate} =
+    useAppContext();
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [contact, setContact] = useState('');
@@ -21,14 +22,15 @@ const HotelReg = () => {
           address,
           city,
         },
-        {headers: {authorization: `Bearer ${await getToken()}`}},
+        {headers: {Authorization: `Bearer ${await getToken()}`}},
       );
       if (data.success) {
         toast.success(data.message);
         setIsOwner(true);
         setShowHotelReg(false);
+        navigate('/owner');
       } else {
-        toast.success(data.message);
+        toast.error(data.message);
       }
     } catch (error) {
       toast.error(error.message);
@@ -120,7 +122,9 @@ const HotelReg = () => {
               ))}
             </select>
           </div>
-          <button className="w-full py-2.5 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-all duration-300 mt-6">
+          <button
+            type="submit"
+            className="w-full py-2.5 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-all duration-300 mt-6">
             Register
           </button>
         </div>

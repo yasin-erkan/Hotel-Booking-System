@@ -1,30 +1,88 @@
-import React, {useMemo} from 'react';
-import {dashboardDummyData, assets} from '../../assets/assets';
+import React, {useState, useEffect, useMemo} from 'react';
+import {assets} from '../../assets/assets';
+import {useAppContext} from '../../context/AppContext';
 
 const Dashboard = () => {
+  const {currency, getToken, user, toast, axios} = useAppContext();
+  const [dashboardData, setDashboardData] = useState({
+    bookings: [],
+    totalBookings: 0,
+    totalRevenue: 0,
+  });
+  const fetchDashBoardData = async () => {
+    try {
+      const {data} = await axios.get('/api/bookings/hotel', {
+        headers: {Authorization: `Bearer ${await getToken()}`},
+      });
+      if (data.success) {
+        setDashboardData(data.dashboardData);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchDashBoardData();
+    }
+  }, [user]);
+
+  const formatBookingDate = isoDate =>
+    new Date(isoDate).toLocaleDateString('en-US', {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric',
+    });
+
+  const normalizeStatus = status =>
+    status === 'pending'
+      ? 'Pending'
+      : status === 'confirmed'
+      ? 'Confirmed'
+      : status === 'cancelled'
+      ? 'Cancelled'
+      : status;
+
+  const recentBookings = useMemo(() => {
+    return (
+      dashboardData.bookings?.slice(0, 3).map(booking => ({
+        id: booking._id,
+        guestName: booking.user?.username || 'Guest',
+        roomName: booking.room?.roomType || 'Room',
+        checkIn: formatBookingDate(booking.checkInDate),
+        checkOut: formatBookingDate(booking.checkOutDate),
+        amount: booking.totalPrice,
+        status: normalizeStatus(booking.status),
+      })) || []
+    );
+  }, [dashboardData.bookings]);
+
   const overviewCards = useMemo(
     () => [
       {
         id: 'total-bookings',
         label: 'Total Bookings',
-        value: dashboardDummyData.totalBookings,
+        value: dashboardData.totalBookings,
         icon: assets.totalBookingIcon,
         description: 'Bookings confirmed this month',
       },
       {
         id: 'total-revenue',
         label: 'Total Revenue',
-        value: `$ ${dashboardDummyData.totalRevenue}`,
+        value: `${currency || '$'} ${dashboardData.totalRevenue}`,
         icon: assets.totalRevenueIcon,
         description: 'Gross revenue across all rooms',
       },
     ],
-    [],
+    [dashboardData.totalBookings, dashboardData.totalRevenue, currency],
   );
 
   return (
     <section className="space-y-12 py-10">
-      <header className="overflow-hidden rounded-3xl border border-blue-100/70 bg-gradient-to-r from-blue-50/80 via-white to-white/60 p-8 shadow-[0_30px_70px_-45px_rgba(37,99,235,0.55)] backdrop-blur-sm">
+      <header className="overflow-hidden rounded-3xl border border-blue-100/70 bg-linear-to-r from-blue-50/80 via-white to-white/60 p-8 shadow-[0_30px_70px_-45px_rgba(37,99,235,0.55)] backdrop-blur-sm">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-500/80">
@@ -55,7 +113,7 @@ const Dashboard = () => {
           <article
             key={card.id}
             className="group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-blue-100/80 bg-white/95 px-6 py-5 shadow-[0_35px_60px_-32px_rgba(37,99,235,0.35)] transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-[0_35px_55px_-30px_rgba(37,99,235,0.45)]">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent shadow-inner ring-1 ring-blue-100">
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-blue-500/10 via-blue-500/5 to-transparent shadow-inner ring-1 ring-blue-100">
               <img
                 src={card.icon}
                 alt={card.label}
@@ -92,7 +150,7 @@ const Dashboard = () => {
           </button>
         </header>
 
-        {dashboardDummyData.recentBookings?.length ? (
+        {recentBookings?.length ? (
           <div className="overflow-hidden rounded-2xl border border-slate-100/80">
             <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
               <thead className="bg-slate-50/80 text-xs uppercase tracking-wide text-slate-400">
@@ -106,7 +164,7 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 bg-white text-slate-600">
-                {dashboardDummyData.recentBookings.map(booking => (
+                {recentBookings.map(booking => (
                   <tr
                     key={booking.id}
                     className="transition hover:bg-blue-50/60">
@@ -123,7 +181,8 @@ const Dashboard = () => {
                       {booking.checkOut}
                     </td>
                     <td className="whitespace-nowrap py-4 pr-6 text-right font-semibold text-slate-900">
-                      ${booking.amount}
+                      {currency || '$'}
+                      {booking.amount}
                     </td>
                     <td className="whitespace-nowrap py-4 pr-6 text-right">
                       <span

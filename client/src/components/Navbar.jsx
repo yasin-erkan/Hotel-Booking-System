@@ -51,7 +51,7 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [location.pathname]);
-  const hostCtaLabel = isOwner ? 'Dashboard' : 'List Your Hotel';
+  const hostCtaLabel = isOwner ? 'Dashboard' : 'Register Your Hotel';
   const handleHostCta = () => {
     if (!user) {
       openSignIn();

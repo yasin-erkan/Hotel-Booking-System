@@ -1,8 +1,11 @@
 import React, {useState} from 'react';
 import Title from '../../components/Title';
 import {assets} from '../../assets/assets';
+import {useAppContext} from '../../context/AppContext';
+import toast from 'react-hot-toast';
 
 const AddRoom = () => {
+  const {axios, getToken} = useAppContext();
   const [images, setImages] = useState({
     1: null,
     2: null,
@@ -24,8 +27,70 @@ const AddRoom = () => {
   const formatAmenityLabel = label =>
     label.replace(/([A-Z])/g, ' $1').replace(/^./, char => char.toUpperCase());
 
+  const [loading, setLoading] = useState(false);
+
+  const onSubmitHandler = async e => {
+    e.preventDefault();
+    // check if all inputs are filled
+    if (
+      !inputs.roomType ||
+      !inputs.pricePerNight ||
+      !inputs.amenities ||
+      !Object.values(images).some(image => image)
+    ) {
+      toast.error('Please, fill in all the details');
+      return;
+    }
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('roomType', inputs.roomType);
+      formData.append('pricePerNight', inputs.pricePerNight);
+      // converting Amenities to Array & keep only enabled Amenities
+      const amenities = Object.keys(inputs.amenities).filter(
+        key => inputs.amenities[key],
+      );
+      formData.append('amenities', JSON.stringify(amenities));
+
+      // then, add images to formData
+      Object.keys(images).forEach(key => {
+        images[key] && formData.append('images', images[key]);
+      });
+
+      const {data} = await axios.post('/api/rooms', formData, {
+        headers: {authorization: `Bearer ${await getToken()}`},
+      });
+      if (data.success) {
+        toast.success(data.message);
+        setInputs({
+          roomType: '',
+          pricePerNight: '',
+          amenities: {
+            freeWifi: false,
+            freeBreakfast: false,
+            roomService: false,
+            mountainView: false,
+            poolAccess: false,
+          },
+        });
+        setImages({
+          1: null,
+          2: null,
+          3: null,
+          4: null,
+        });
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <form className="mx-auto max-w-5xl space-y-10">
+    <form onSubmit={onSubmitHandler} className="mx-auto max-w-5xl space-y-10">
       <Title
         align="left"
         font="outfit"
@@ -194,8 +259,9 @@ const AddRoom = () => {
       <div className="flex justify-end">
         <button
           type="submit"
-          className="inline-flex items-center justify-center rounded-full bg-blue-500 px-8 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-blue-600">
-          Add Room
+          className="inline-flex items-center justify-center rounded-full bg-blue-500 px-8 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-blue-600"
+          disabled={loading}>
+          {loading ? 'Loading....' : 'Add Room'}
         </button>
       </div>
     </form>
