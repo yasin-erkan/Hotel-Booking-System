@@ -3,7 +3,7 @@ import {Link} from 'react-router-dom';
 import {assets} from '../assets/assets';
 import {useClerk, UserButton} from '@clerk/clerk-react';
 import {useLocation} from 'react-router-dom';
-import {useAppContext} from '../context/AppContext';
+import {useAppContext} from '../context/AppContext.jsx';
 
 const BookIcon = () => (
   <svg
