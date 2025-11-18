@@ -1,11 +1,10 @@
 import React from 'react';
 import HotelCard from './HotelCard';
 import Title from './Title';
-import {useAppContext} from '../../context/AppContext.jsx';
+import {useAppContext} from '../context/AppContext.jsx';
 
 const FeaturedDestination = () => {
   const {rooms, navigate} = useAppContext();
-
   return (
     rooms.length > 0 && (
       <div className="flex flex-col items-center bg-slate-50 px-4 py-20 sm:px-8 md:px-10 lg:px-12">

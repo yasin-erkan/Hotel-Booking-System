@@ -76,6 +76,11 @@ hotel-booking/
 - [x] Dashboard data fetching with useMemo optimization
 - [x] Recent bookings display with formatted dates and status
 - [x] Revenue and booking statistics cards
+- [x] Room filtering by type (Single Bed, Double Bed, Luxury Bed, Family Suite)
+- [x] Price range filtering with dynamic range selection
+- [x] Sort functionality (Price Low to High, Price High to Low, Newest First)
+- [x] Destination-based filtering from URL search params
+- [x] Filter state management with clear filters functionality
 
 ### ✅ Completed (Backend)
 
@@ -95,7 +100,6 @@ hotel-booking/
 
 - [ ] Payment integration
 - [ ] Email notifications
-- [ ] Search and filter functionality
 - [ ] Real-time booking updates
 
 ### 📋 To Do
@@ -199,8 +203,12 @@ npm run dev
 
 ### Latest Changes
 
+- **Search & Filter System**: Implemented comprehensive room filtering with room type, price range, and destination filters
+- **Sort Functionality**: Added sorting by price (low to high, high to low) and newest first
+- **Filter State Management**: Built robust filter state management with clear filters functionality
+- **Room Type Matching**: Fixed room type matching logic with normalization for case-insensitive comparison
 - **Dashboard Integration**: Connected Dashboard component to real API endpoints (`/api/bookings/hotel`) for live data
-- **Performance Optimization**: Implemented `useMemo` hooks for `overviewCards` and `recentBookings` to prevent unnecessary re-renders
+- **Performance Optimization**: Implemented `useMemo` hooks for filtered rooms and other computed values
 - **Data Formatting**: Added date formatting and status normalization utilities for booking display
 - **Import Path Fixes**: Standardized all AppContext imports to use extensionless paths for better Vite compatibility
 - **Vite Configuration**: Added resolve extensions (`.js`, `.jsx`, `.json`) to vite.config.js
@@ -212,6 +220,8 @@ npm run dev
 - Added proper error handling for API requests
 - Implemented currency support from AppContext
 - Fixed React hooks dependencies and imports
+- Added room filtering with normalized type matching (handles "double" vs "Double Bed")
+- Implemented URL search params integration for destination filtering
 
 ## 🧪 Troubleshooting
 
