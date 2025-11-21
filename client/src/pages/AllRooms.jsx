@@ -4,6 +4,18 @@ import {assets} from '../assets/assets';
 import {facilityIcons} from '../assets/assets';
 import {useAppContext} from '../context/AppContext';
 
+// Map camelCase to Title Case for amenities
+const getAmenityKey = amenity => {
+  const map = {
+    freeWifi: 'Free WiFi',
+    freeBreakfast: 'Free Breakfast',
+    roomService: 'Room Service',
+    mountainView: 'Mountain View',
+    poolAccess: 'Pool Access',
+  };
+  return map[amenity] || amenity;
+};
+
 const CheckBox = ({label, selected = false, onChange = () => {}}) => {
   return (
     <label className="flex gap-3 items-center cursor-pointer mt-2 text-sm">
@@ -129,6 +141,7 @@ const AllRooms = () => {
   const filterDestination = room => {
     const destination = searchParams.get('destination');
     if (!destination) return true;
+    if (!room.hotel || !room.hotel.city) return false;
     return room.hotel.city.toLowerCase().includes(destination.toLowerCase());
   };
   //filter and sort rooms based upon the selected filters and sort options
@@ -165,7 +178,16 @@ const AllRooms = () => {
           </p>
         </div>
 
-        {filteredRooms.map(room => (
+        {filteredRooms.length === 0 ? (
+          <div className="mt-10 text-center">
+            <p className="text-gray-500 text-lg">
+              {searchParams.get('destination')
+                ? `No hotels found for "${searchParams.get('destination')}"`
+                : 'No rooms available'}
+            </p>
+          </div>
+        ) : (
+          filteredRooms.map(room => (
           <div
             key={room._id}
             className="flex flex-col md:flex-row items-start py-10 gap-6 border-b border-gray-300 last:pb-30 last:border-b-0 ">
@@ -200,18 +222,19 @@ const AllRooms = () => {
               </div>
               {/* room amenities */}
               <div className="flex flex-wrap items-center mt-3 mb-6  r gap-4">
-                {room.amenities.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#F5F5FF]/70">
-                    <img
-                      src={facilityIcons[item]}
-                      alt={item}
-                      className="w-5 h-5"
-                    />
-                    <p className="text-xs text-gray-500">{item}</p>
-                  </div>
-                ))}
+                {room.amenities.map((item, index) => {
+                  const amenityKey = getAmenityKey(item);
+                  const icon = facilityIcons[amenityKey];
+                  if (!icon) return null;
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#F5F5FF]/70">
+                      <img src={icon} alt={amenityKey} className="w-5 h-5" />
+                      <p className="text-xs text-gray-500">{amenityKey}</p>
+                    </div>
+                  );
+                })}
               </div>
               {/* room price  per night*/}
               <p>
@@ -222,7 +245,8 @@ const AllRooms = () => {
               </p>
             </div>
           </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* filters */}
@@ -265,7 +289,7 @@ const AllRooms = () => {
             {priceRanges.map((range, index) => (
               <CheckBox
                 key={index}
-                label={`$ ${currency} ${range}`}
+                label={`${currency}${range}`}
                 selected={selectedFilters.priceRange.includes(range)}
                 onChange={checked =>
                   handleFilterChange(checked, range, 'priceRange')

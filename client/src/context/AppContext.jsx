@@ -3,6 +3,7 @@ import {createContext, useContext, useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useUser, useAuth} from '@clerk/clerk-react';
 import {toast} from 'react-hot-toast';
+import {roomsDummyData} from '../assets/assets';
 
 axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
@@ -21,11 +22,17 @@ export const AppProvider = ({children}) => {
     try {
       const {data} = await axios.get('/api/rooms');
       if (data.success) {
-        setRooms(data.rooms);
+        // Combine MongoDB rooms with mock data
+        const allRooms = [...data.rooms, ...roomsDummyData];
+        setRooms(allRooms);
       } else {
+        // If API fails, use mock data
+        setRooms(roomsDummyData);
         toast.error(data.message);
       }
     } catch (error) {
+      // If API fails, use mock data
+      setRooms(roomsDummyData);
       toast.error(error.message);
     }
   };

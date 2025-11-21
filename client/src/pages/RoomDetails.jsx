@@ -1,21 +1,25 @@
 import React, {useState, useEffect} from 'react';
 import {useParams} from 'react-router-dom';
-import {roomsDummyData} from '../assets/assets';
 import StarRating from '../components/StarRating';
-import {assets} from '../assets/assets';
-import {facilityIcons} from '../assets/assets';
-import {roomCommonData} from '../assets/assets';
+import {assets, facilityIcons, roomCommonData} from '../assets/assets';
+import {useAppContext} from '../context/AppContext';
 
 const RoomDetails = () => {
   const {id} = useParams();
+  const {rooms, getToken, axios, navigate} = useAppContext();
   const [room, setRoom] = useState(null);
   const [mainImage, setMainImage] = useState(null);
+  const [checkInDate, setCheckInDate] = useState(null);
+  const [checkOutDate, setCheckOutDate] = useState(null);
+  const [guests, setGuests] = useState(1);
+  const [isAvailable, setIsAvailable] = useState(false);
 
   useEffect(() => {
-    const room = roomsDummyData.find(room => room._id === id);
+    const room = rooms.find(room => room._id === id);
     room && setRoom(room);
     room && setMainImage(room.images[0]);
-  }, []);
+    
+  }, [rooms]);
   return (
     room && (
       <div className="py-28 md:py-35 px-4 md:px-16 lg:px-24 xl:px-32">
@@ -163,6 +167,8 @@ const RoomDetails = () => {
                   Check-in
                 </label>
                 <input
+                  onChange={e => setCheckInDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
                   type="date"
                   id="checkInDate"
                   placeholder="Select check-in date"
@@ -177,6 +183,9 @@ const RoomDetails = () => {
                   Check-out
                 </label>
                 <input
+                  onChange={e => setCheckOutDate(e.target.value)}
+                  min={checkInDate}
+                  disabled={!checkInDate}
                   type="date"
                   id="checkOutDate"
                   placeholder="Select check-out date"
@@ -191,10 +200,12 @@ const RoomDetails = () => {
                   Guests
                 </label>
                 <input
+                  onChange={e => setGuests(e.target.value)}
+                  value={guests}
                   type="number"
                   id="guests"
                   min={1}
-                  placeholder="2"
+                  placeholder="1"
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                   required
                 />
@@ -215,7 +226,7 @@ const RoomDetails = () => {
               <button
                 type="submit"
                 className="mt-2 inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-dull focus:outline-none focus:ring-2 focus:ring-primary/40 lg:mt-0">
-                Check Availability
+                {isAvailable ? 'Book Now' : 'Check Availability'}
               </button>
             </div>
             <p className="mt-4 text-xs text-gray-500">

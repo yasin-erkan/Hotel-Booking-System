@@ -16,6 +16,10 @@ Full-stack hotel booking application built with MERN stack featuring admin dashb
 - 💳 Secure booking system UI flows
 - 👤 User authentication (Clerk)
 - 📱 Fully responsive design across desktop, tablet, mobile
+- 🎯 Recommended hotels based on recent searches
+- 🏙️ Featured destinations showcase
+- 🔎 Advanced filtering (room type, price range, destination)
+- 📊 Sort functionality (price, newest)
 
 ### Admin Dashboard
 
@@ -81,6 +85,11 @@ hotel-booking/
 - [x] Sort functionality (Price Low to High, Price High to Low, Newest First)
 - [x] Destination-based filtering from URL search params
 - [x] Filter state management with clear filters functionality
+- [x] Recommended Hotels component with search-based recommendations
+- [x] Hotel data population fix (Room model ObjectId reference)
+- [x] Amenity icon mapping system (camelCase to Title Case)
+- [x] Mock data integration for development
+- [x] Search functionality improvements with state persistence
 
 ### ✅ Completed (Backend)
 
@@ -95,6 +104,8 @@ hotel-booking/
 - [x] Booking creation with price calculation
 - [x] User bookings retrieval
 - [x] Hotel owner bookings dashboard with revenue analytics
+- [x] Room model hotel reference fix (String to ObjectId for proper population)
+- [x] Hotel data population in room queries
 
 ### 🚧 In Progress
 
@@ -203,6 +214,11 @@ npm run dev
 
 ### Latest Changes
 
+- **Recommended Hotels Feature**: Added personalized hotel recommendations based on user's recent searches
+- **Search Functionality**: Improved search with immediate state updates and non-blocking API calls
+- **Hotel Data Population**: Fixed Room model hotel reference from String to ObjectId for proper MongoDB population
+- **Amenity Icon System**: Implemented mapping system for amenity icons (camelCase to Title Case conversion)
+- **Mock Data Integration**: Integrated mock data from assets.js for development and testing
 - **Search & Filter System**: Implemented comprehensive room filtering with room type, price range, and destination filters
 - **Sort Functionality**: Added sorting by price (low to high, high to low) and newest first
 - **Filter State Management**: Built robust filter state management with clear filters functionality
@@ -210,18 +226,17 @@ npm run dev
 - **Dashboard Integration**: Connected Dashboard component to real API endpoints (`/api/bookings/hotel`) for live data
 - **Performance Optimization**: Implemented `useMemo` hooks for filtered rooms and other computed values
 - **Data Formatting**: Added date formatting and status normalization utilities for booking display
-- **Import Path Fixes**: Standardized all AppContext imports to use extensionless paths for better Vite compatibility
-- **Vite Configuration**: Added resolve extensions (`.js`, `.jsx`, `.json`) to vite.config.js
-- **Syntax Fixes**: Fixed conditional rendering syntax in FeaturedDestination component
 
 ### Technical Improvements
 
-- Replaced dummy data with real API calls in Dashboard
-- Added proper error handling for API requests
-- Implemented currency support from AppContext
-- Fixed React hooks dependencies and imports
-- Added room filtering with normalized type matching (handles "double" vs "Double Bed")
-- Implemented URL search params integration for destination filtering
+- Fixed Room model hotel field type (String → ObjectId) for proper populate() functionality
+- Added null checks for hotel data in AllRooms component
+- Implemented case-insensitive city matching in RecommendedHotels
+- Added mock data fallback in AppContext for better development experience
+- Improved search state persistence across page navigation
+- Fixed conditional rendering in RecommendedHotels (only shows after user searches)
+- Added proper error handling for missing hotel data
+- Standardized all AppContext imports to use extensionless paths for better Vite compatibility
 
 ## 🧪 Troubleshooting
 
