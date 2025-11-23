@@ -222,15 +222,24 @@ const AllRooms = () => {
               </div>
               {/* room amenities */}
               <div className="flex flex-wrap items-center mt-3 mb-6  r gap-4">
-                {room.amenities.map((item, index) => {
+                {room.amenities?.map((item, index) => {
                   const amenityKey = getAmenityKey(item);
                   const icon = facilityIcons[amenityKey];
-                  if (!icon) return null;
                   return (
                     <div
                       key={index}
                       className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#F5F5FF]/70">
-                      <img src={icon} alt={amenityKey} className="w-5 h-5" />
+                      {icon && (
+                        <img 
+                          src={icon} 
+                          alt={amenityKey} 
+                          className="w-5 h-5"
+                          onError={(e) => {
+                            console.error(`Failed to load icon for: ${amenityKey}`, icon);
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      )}
                       <p className="text-xs text-gray-500">{amenityKey}</p>
                     </div>
                   );
