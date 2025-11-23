@@ -17,17 +17,15 @@ const Dashboard = () => {
       const {data} = await axios.get('/api/bookings/hotel', {
         headers: {Authorization: `Bearer ${await getToken()}`},
       });
-      console.log('Dashboard API response:', data);
       if (data.success) {
-        const dashboardData = data.dashboardData || {
-          bookings: [],
-          totalBookings: 0,
-          totalRevenue: 0,
-        };
-        console.log('Setting dashboard data:', dashboardData);
-        setDashboardData(dashboardData);
+        setDashboardData(
+          data.dashboardData || {
+            bookings: [],
+            totalBookings: 0,
+            totalRevenue: 0,
+          },
+        );
       } else {
-        console.warn('Dashboard API returned success:false', data);
         toast.error(data.message || 'Failed to fetch dashboard data');
         setDashboardData({
           bookings: [],
@@ -36,8 +34,11 @@ const Dashboard = () => {
         });
       }
     } catch (error) {
-      console.error('Dashboard fetch error:', error);
-      toast.error(error.response?.data?.message || error.message || 'Failed to fetch dashboard data');
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          'Failed to fetch dashboard data',
+      );
       setDashboardData({
         bookings: [],
         totalBookings: 0,
@@ -71,17 +72,18 @@ const Dashboard = () => {
       : status;
 
   const recentBookings = useMemo(() => {
-    return (
-      dashboardData.bookings?.slice(0, 3).map(booking => ({
-        id: booking._id,
-        guestName: booking.user?.username || 'Guest',
-        roomName: booking.room?.roomType || 'Room',
-        checkIn: formatBookingDate(booking.checkInDate),
-        checkOut: formatBookingDate(booking.checkOutDate),
-        amount: booking.totalPrice,
-        status: normalizeStatus(booking.status),
-      })) || []
-    );
+    if (!dashboardData.bookings || dashboardData.bookings.length === 0) {
+      return [];
+    }
+    return dashboardData.bookings.slice(0, 3).map(booking => ({
+      id: booking._id,
+      guestName: booking.user?.username || 'Guest',
+      roomName: booking.room?.roomType || 'Room',
+      checkIn: formatBookingDate(booking.checkInDate),
+      checkOut: formatBookingDate(booking.checkOutDate),
+      amount: booking.totalPrice,
+      status: normalizeStatus(booking.status),
+    }));
   }, [dashboardData.bookings]);
 
   const overviewCards = useMemo(
@@ -89,14 +91,14 @@ const Dashboard = () => {
       {
         id: 'total-bookings',
         label: 'Total Bookings',
-        value: dashboardData.totalBookings,
+        value: dashboardData.totalBookings || 0,
         icon: assets.totalBookingIcon,
         description: 'Bookings confirmed this month',
       },
       {
         id: 'total-revenue',
         label: 'Total Revenue',
-        value: `${currency || '$'} ${dashboardData.totalRevenue}`,
+        value: `${currency || '$'}${dashboardData.totalRevenue || 0}`,
         icon: assets.totalRevenueIcon,
         description: 'Gross revenue across all rooms',
       },

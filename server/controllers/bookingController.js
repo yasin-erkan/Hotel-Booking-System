@@ -175,6 +175,7 @@ export const getHotelBookings = async (req, res) => {
     await ensureConnection();
     const auth = await req.auth();
     const hotel = await Hotel.findOne({owner: auth.userId});
+
     if (!hotel) {
       return res.json({
         success: true,
@@ -182,9 +183,42 @@ export const getHotelBookings = async (req, res) => {
         message: 'No Hotel found',
       });
     }
-    const bookings = await Booking.find({hotel: hotel._id})
+
+    // Hotel ID can be ObjectId or String, so check both formats
+    const hotelIdString = hotel._id.toString();
+    const hotelObjectId = hotel._id;
+
+    // Get all bookings and filter by hotel ID (handling both string and ObjectId formats)
+    // First, try to find bookings with string hotel ID
+    let bookings = await Booking.find({hotel: hotelIdString})
       .populate('room hotel user')
       .sort({createdAt: -1});
+
+    // If no bookings found, try ObjectId format
+    if (bookings.length === 0) {
+      bookings = await Booking.find({hotel: hotelObjectId})
+        .populate('room hotel user')
+        .sort({createdAt: -1});
+    }
+
+    // If still no bookings, try to find by comparing populated hotel IDs
+    if (bookings.length === 0) {
+      const allBookings = await Booking.find({})
+        .populate('room hotel user')
+        .sort({createdAt: -1});
+
+      // Filter bookings where hotel._id matches owner's hotel ID
+      bookings = allBookings.filter(booking => {
+        if (!booking.hotel) return false;
+        const bookingHotelId =
+          booking.hotel._id?.toString() || booking.hotel.toString();
+        return (
+          bookingHotelId === hotelIdString ||
+          bookingHotelId === hotelObjectId.toString()
+        );
+      });
+    }
+
     // total bookings
     const totalBookings = bookings.length;
     //total revenue
@@ -192,9 +226,16 @@ export const getHotelBookings = async (req, res) => {
       (acc, booking) => acc + (booking.totalPrice || 0),
       0,
     );
+
+    const dashboardData = {
+      totalBookings,
+      totalRevenue,
+      bookings: bookings || [],
+    };
+
     res.json({
       success: true,
-      dashboardData: {totalBookings, totalRevenue, bookings: bookings || []},
+      dashboardData,
     });
   } catch (error) {
     console.error('Error fetching hotel bookings:', error);

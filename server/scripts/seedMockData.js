@@ -12,7 +12,8 @@ dotenv.config({path: path.resolve(__dirname, '..', '.env')});
 dotenv.config({path: path.resolve(__dirname, '..', '..', '.env')});
 
 // Mock data from assets.js
-const ownerId = process.env.SEED_OWNER_ID || 'user_2unqyL4diJFP1E3pIBnasc7w8hP';
+// Update this with your actual Clerk User ID
+const ownerId = process.env.SEED_OWNER_ID || 'user_35IlQNxUGYLezuK0FJrvbN7kztc';
 
 const hotelData = {
   name: 'Urbanza Suites',
