@@ -4,6 +4,13 @@ import {assets} from '../assets/assets';
 import {facilityIcons} from '../assets/assets';
 import {useAppContext} from '../context/AppContext';
 
+// Direct icon imports for better reliability
+import freeWifiIcon from '../assets/freeWifiIcon.svg';
+import freeBreakfastIcon from '../assets/freeBreakfastIcon.svg';
+import roomServiceIcon from '../assets/roomServiceIcon.svg';
+import mountainIcon from '../assets/mountainIcon.svg';
+import poolIcon from '../assets/poolIcon.svg';
+
 // Map camelCase to Title Case for amenities
 const getAmenityKey = amenity => {
   const map = {
@@ -14,6 +21,15 @@ const getAmenityKey = amenity => {
     poolAccess: 'Pool Access',
   };
   return map[amenity] || amenity;
+};
+
+// Local icon map with direct imports
+const localFacilityIcons = {
+  'Free WiFi': freeWifiIcon,
+  'Free Breakfast': freeBreakfastIcon,
+  'Room Service': roomServiceIcon,
+  'Mountain View': mountainIcon,
+  'Pool Access': poolIcon,
 };
 
 const CheckBox = ({label, selected = false, onChange = () => {}}) => {
@@ -224,22 +240,28 @@ const AllRooms = () => {
               <div className="flex flex-wrap items-center mt-3 mb-6  r gap-4">
                 {room.amenities?.map((item, index) => {
                   const amenityKey = getAmenityKey(item);
-                  const icon = facilityIcons[amenityKey];
+                  // Try local icons first, fallback to imported facilityIcons
+                  const icon = localFacilityIcons[amenityKey] || facilityIcons[amenityKey];
+                  
                   return (
                     <div
                       key={index}
                       className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#F5F5FF]/70">
-                      {icon && (
+                      {icon ? (
                         <img 
                           src={icon} 
                           alt={amenityKey} 
                           className="w-5 h-5"
                           onError={(e) => {
-                            console.error(`Failed to load icon for: ${amenityKey}`, icon);
+                            console.error(`Failed to load icon for: ${amenityKey}`, {
+                              icon,
+                              originalItem: item,
+                              amenityKey
+                            });
                             e.target.style.display = 'none';
                           }}
                         />
-                      )}
+                      ) : null}
                       <p className="text-xs text-gray-500">{amenityKey}</p>
                     </div>
                   );
