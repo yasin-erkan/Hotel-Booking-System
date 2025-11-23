@@ -59,6 +59,28 @@ const MyBookings = () => {
       fetchUserBookings();
     }
   }, [user]);
+
+  // Refresh bookings when returning from payment
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    if (paymentStatus === 'success' && user) {
+      // Refresh immediately, then poll a few times to catch webhook update
+      fetchUserBookings();
+      window.history.replaceState({}, '', '/my-bookings');
+      
+      // Poll for webhook update (check every 1 second, max 3 times)
+      let pollCount = 0;
+      const pollInterval = setInterval(() => {
+        pollCount++;
+        fetchUserBookings();
+        if (pollCount >= 3) {
+          clearInterval(pollInterval);
+        }
+      }, 1000);
+    }
+  }, [user]);
+
   return (
     <div className="py-28 md:py-35  md:pt-32 px-4 md:px-16 lg:px-24 xl:px-32">
       <Title

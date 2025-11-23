@@ -41,11 +41,13 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // API to listen to Stripe Webhooks
+// Support both /api/stripe and /stripe for flexibility
 app.post(
   '/api/stripe',
   express.raw({type: 'application/json'}),
   stripeWebHooks,
 );
+app.post('/stripe', express.raw({type: 'application/json'}), stripeWebHooks);
 
 // Security headers
 app.use((req, res, next) => {
