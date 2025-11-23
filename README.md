@@ -5,7 +5,7 @@ Full-stack hotel booking application built with MERN stack featuring admin dashb
 ## 🛠️ Tech Stack
 
 **Frontend:** React 19.1, React Router, TailwindCSS 4.1, Vite, React Hot Toast  
-**Backend:** Node.js, Express.js, MongoDB, Mongoose, Clerk Authentication, Cloudinary
+**Backend:** Node.js, Express.js, MongoDB, Mongoose, Clerk Authentication, Cloudinary, Nodemailer (Brevo SMTP)
 
 ## ✨ Features
 
@@ -28,6 +28,7 @@ Full-stack hotel booking application built with MERN stack featuring admin dashb
 - 📋 Booking tracking table with status toggles
 - 💰 Pricing chips, inventory badges, actionable CTAs
 - 🧭 Owner console layout with sticky navbar + glass sidebar
+- 📧 Email notifications for booking confirmations
 
 ## 📸 Screenshots
 
@@ -106,11 +107,15 @@ hotel-booking/
 - [x] Hotel owner bookings dashboard with revenue analytics
 - [x] Room model hotel reference fix (String to ObjectId for proper population)
 - [x] Hotel data population in room queries
+- [x] Email notification system with Brevo SMTP integration
+- [x] MongoDB connection handling for serverless environments (ensureConnection)
+- [x] Data seeding script for MongoDB
+- [x] Production-ready deployment configurations (CORS, security headers, error handling)
+- [x] Icon rendering fixes for amenity display
 
 ### 🚧 In Progress
 
 - [ ] Payment integration
-- [ ] Email notifications
 - [ ] Real-time booking updates
 
 ### 📋 To Do
@@ -118,7 +123,6 @@ hotel-booking/
 - [ ] Booking cancellation endpoint
 - [ ] Booking status update endpoint
 - [ ] Advanced search and filter functionality
-- [ ] Email notifications for bookings
 
 ## 🚀 Getting Started
 
@@ -162,6 +166,18 @@ CLERK_WEBHOOK_SECRET_KEY=whsec_...
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
+
+# Email Configuration (Brevo/Sendinblue)
+SMTP_USER=your_smtp_user@smtp-brevo.com
+SMTP_PASS=your_smtp_password
+SENDER_EMAIL=your_email@example.com
+
+# Frontend URL (for CORS)
+FRONTEND_URL=http://localhost:5173
+
+# Server Configuration
+PORT=3000
+NODE_ENV=development
 ```
 
 **Frontend (.env in `client/`)**
@@ -169,9 +185,17 @@ CLOUDINARY_API_SECRET=your_api_secret
 ```env
 VITE_BACKEND_URL=http://localhost:3000
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+VITE_CURRENCY=$
 ```
 
-4. Run the application
+4. Seed mock data (optional)
+
+```bash
+# Backend (from server/)
+npm run seed
+```
+
+5. Run the application
 
 ```bash
 # Backend (from server/)
@@ -226,6 +250,11 @@ npm run dev
 - **Dashboard Integration**: Connected Dashboard component to real API endpoints (`/api/bookings/hotel`) for live data
 - **Performance Optimization**: Implemented `useMemo` hooks for filtered rooms and other computed values
 - **Data Formatting**: Added date formatting and status normalization utilities for booking display
+- **Email Notifications**: Implemented booking confirmation emails using Brevo SMTP with Clerk email integration
+- **MongoDB Connection**: Added `ensureConnection()` to all controllers for serverless compatibility
+- **Deployment Ready**: Added CORS configuration, security headers, error handling middleware
+- **Data Seeding**: Created seed script for populating MongoDB with mock data
+- **Icon Fixes**: Fixed amenity icon rendering with direct imports
 
 ### Technical Improvements
 
@@ -237,6 +266,11 @@ npm run dev
 - Fixed conditional rendering in RecommendedHotels (only shows after user searches)
 - Added proper error handling for missing hotel data
 - Standardized all AppContext imports to use extensionless paths for better Vite compatibility
+- Added `ensureConnection()` to prevent MongoDB connection errors in serverless environments
+- Implemented production-ready CORS configuration with environment-based origin
+- Added security headers (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection)
+- Fixed email sending to use real user email from Clerk instead of placeholder
+- Improved icon rendering with direct imports to prevent Vite tree-shaking issues
 
 ## 🧪 Troubleshooting
 
@@ -244,6 +278,9 @@ npm run dev
 - **Frontend can't reach the API** – confirm `VITE_BACKEND_URL` is set and Vite was restarted after editing `.env`. Axios pulls its base URL at import time.
 - **Signature verification fails** – double-check both `CLERK_SECRET_KEY` (for middleware) and `CLERK_WEBHOOK_SECRET_KEY` (for Svix) are set in your backend environment.
 - **Import resolution errors** – if Vite can't resolve imports, clear the cache with `rm -rf node_modules/.vite` and restart the dev server. Ensure all imports use extensionless paths (e.g., `'../../context/AppContext'` not `'../../context/AppContext.jsx'`).
+- **MongoDB connection errors** – if you see "Cannot call `rooms.find()` before initial connection is complete", ensure `ensureConnection()` is called in controllers. This is already implemented.
+- **Email not sending** – verify Brevo SMTP credentials are set correctly and sender email is verified in Brevo dashboard. Check that `SENDER_EMAIL` matches your verified Brevo sender.
+- **Icon not displaying** – ensure icons are imported directly in components to prevent Vite tree-shaking issues. This is already fixed in AllRooms component.
 
 ## 🚢 Deployment
 
@@ -254,6 +291,26 @@ Backend and frontend are deployed separately on Vercel:
 - Backend: Uses `server/vercel.json` configuration
 - Frontend: Uses `client/vercel.json` configuration
 
-Make sure to set all environment variables in Vercel dashboard.
+**Environment Variables for Vercel:**
+
+**Backend:**
+- `MONGODB_URI`, `MONGODB_DB`
+- `CLERK_SECRET_KEY`, `CLERK_WEBHOOK_SECRET_KEY`
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+- `SMTP_USER`, `SMTP_PASS`, `SENDER_EMAIL`
+- `FRONTEND_URL` (your frontend domain)
+- `NODE_ENV=production`
+- `PORT=3000`
+
+**Frontend:**
+- `VITE_BACKEND_URL` (your backend domain)
+- `VITE_CLERK_PUBLISHABLE_KEY`
+- `VITE_CURRENCY=$` (optional)
+
+**Important Notes:**
+- Use production Clerk keys (`sk_live_` and `pk_live_`) in production
+- Verify sender email in Brevo dashboard
+- Update Clerk webhook URL to your production backend domain
+- Set `FRONTEND_URL` to your production frontend domain for CORS
 
 ⭐ Star this repo if you find it helpful!
