@@ -30,14 +30,32 @@ if (!CLERK_SECRET_KEY) {
 }
 
 const app = express();
-app.use(cors());
+
+// CORS configuration for production
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || process.env.VITE_BACKEND_URL || '*',
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
+
+// Security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
+
 app.use(
   express.json({
     verify: (req, res, buf) => {
       req.rawBody = buf;
     },
+    limit: '10mb',
   }),
 );
+app.use(express.urlencoded({extended: true, limit: '10mb'}));
 // Clerk Express middleware - pass secretKey explicitly
 app.use(
   clerkMiddleware({
@@ -61,6 +79,25 @@ app.use('/api/user', userRouter);
 app.use('/api/hotels', hotelRouter);
 app.use('/api/rooms/', roomRouter);
 app.use('/api/bookings/', bookingRouter);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err.message);
+  res.status(err.status || 500).json({
+    success: false,
+    message: process.env.NODE_ENV === 'production' 
+      ? 'Internal server error' 
+      : err.message,
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+  });
+});
 
 const PORT = process.env.PORT || 3000;
 

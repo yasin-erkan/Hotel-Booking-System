@@ -3,10 +3,11 @@ import {useParams} from 'react-router-dom';
 import StarRating from '../components/StarRating';
 import {assets, facilityIcons, roomCommonData} from '../assets/assets';
 import {useAppContext} from '../context/AppContext';
+import toast from 'react-hot-toast';
 
 const RoomDetails = () => {
   const {id} = useParams();
-  const {rooms, getToken, axios, navigate} = useAppContext();
+  const {rooms, getToken, axios, navigate, user: clerkUser} = useAppContext();
   const [room, setRoom] = useState(null);
   const [mainImage, setMainImage] = useState(null);
   const [checkInDate, setCheckInDate] = useState(null);
@@ -14,12 +15,97 @@ const RoomDetails = () => {
   const [guests, setGuests] = useState(1);
   const [isAvailable, setIsAvailable] = useState(false);
 
+  const checkAvailability = async () => {
+    try {
+      // check is check-in date is grater than check-out date
+      if (checkInDate >= checkOutDate) {
+        toast.error('check-in date should be less than check-out date');
+        return;
+      }
+      const {data} = await axios.post('/api/bookings/check-availability', {
+        room: id,
+        checkInDate,
+        checkOutDate,
+      });
+      if (data.success) {
+        if (data.isAvailable) {
+          setIsAvailable(true);
+          toast.success('Room is available');
+        } else {
+          setIsAvailable(false);
+          toast.error('Room is not available now');
+        }
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  // onSubmitHandler function to check availability & book the room
+
+  const onSubmitHandler = async e => {
+    try {
+      e.preventDefault();
+
+      if (!isAvailable) {
+        await checkAvailability();
+        return;
+      } else {
+        // Get real email from Clerk
+        const userEmail = clerkUser?.primaryEmailAddress?.emailAddress || 
+                         clerkUser?.emailAddresses?.[0]?.emailAddress || 
+                         null;
+        
+        const {data} = await axios.post(
+          '/api/bookings/book',
+          {
+            room: id,
+            checkInDate,
+            checkOutDate,
+            guests,
+            paymentMethod: 'Pay at Hotel',
+            userEmail, // Send real email from frontend
+          },
+          {headers: {Authorization: `Bearer ${await getToken()}`}},
+        );
+        if (data && data.success) {
+          toast.success(data.message || 'Booking created successfully');
+          navigate('/my-bookings');
+          scrollTo(0, 0);
+        } else {
+          toast.error(data?.message || 'Failed to create booking');
+        }
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        'Failed to process booking';
+      toast.error(errorMessage);
+
+      // If room not found, redirect to rooms page after showing error
+      if (
+        errorMessage.toLowerCase().includes('room not found') ||
+        errorMessage.toLowerCase().includes('not found')
+      ) {
+        setTimeout(() => {
+          navigate('/rooms');
+        }, 2000);
+      }
+    }
+  };
+
   useEffect(() => {
     const room = rooms.find(room => room._id === id);
-    room && setRoom(room);
-    room && setMainImage(room.images[0]);
-    
-  }, [rooms]);
+    if (room) {
+      setRoom(room);
+      setMainImage(room.images[0]);
+    } else {
+      toast.error('Room not found');
+      navigate('/rooms');
+    }
+  }, [rooms, id, navigate]);
   return (
     room && (
       <div className="py-28 md:py-35 px-4 md:px-16 lg:px-24 xl:px-32">
@@ -156,7 +242,9 @@ const RoomDetails = () => {
             </div>
           </div>
 
+          {/*Check-in check-out form*/}
           <form
+            onSubmit={onSubmitHandler}
             aria-label="Check availability form"
             className="border-t border-gray-100 bg-slate-50/60 p-6 lg:p-8">
             <div className="grid gap-4 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto] lg:items-end">

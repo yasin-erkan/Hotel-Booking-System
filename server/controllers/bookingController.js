@@ -1,6 +1,7 @@
 import Booking from '../models/Booking.js';
 import Room from '../models/Room.js';
 import Hotel from '../models/Hotel.js';
+import transporter from '../configs/nodeMailer.js';
 
 // Utility function: Check existing bookings in database
 export const checkAvailability = async ({checkInDate, checkOutDate, room}) => {
@@ -13,7 +14,6 @@ export const checkAvailability = async ({checkInDate, checkOutDate, room}) => {
     const isAvailable = bookings.length === 0;
     return isAvailable;
   } catch (error) {
-    console.error('Availability check error:', error.message);
     throw error;
   }
 };
@@ -39,7 +39,15 @@ export const checkAvailabilityAPI = async (req, res) => {
 export const createBooking = async (req, res) => {
   try {
     // first reach info and user on the body of request coming from client side
-    const {room, checkInDate, checkOutDate, guests} = req.body;
+    const {room, checkInDate, checkOutDate, guests, userEmail} = req.body;
+
+    // Use email from frontend (Clerk) if provided, otherwise check user model
+    const recipientEmail =
+      userEmail && !userEmail.includes('@clerk.local')
+        ? userEmail
+        : req.user.email && !req.user.email.includes('@clerk.local')
+        ? req.user.email
+        : null;
 
     //  check availability
     const isAvailable = await checkAvailability({
@@ -68,30 +76,92 @@ export const createBooking = async (req, res) => {
     totalPrice *= nights;
 
     const booking = await Booking.create({
-      user: req.user._id,
-      room,
-      hotel: roomData.hotel._id,
+      user: req.user._id.toString(),
+      room: room.toString(),
+      hotel: roomData.hotel._id.toString(),
       guests: +guests,
       checkInDate,
       checkOutDate,
       totalPrice,
     });
-    res.json({success: true, message: 'Booking created '});
+
+    // Send email notification (non-blocking)
+    if (
+      recipientEmail &&
+      !recipientEmail.includes('@clerk.local') &&
+      process.env.SMTP_USER &&
+      process.env.SMTP_PASS
+    ) {
+      try {
+        const mailOptions = {
+          from: process.env.SENDER_EMAIL || process.env.SMTP_USER,
+          to: recipientEmail,
+          subject: 'Hotel Booking Confirmation',
+          html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #2563eb;">Your Booking Confirmation</h2>
+            <p>Dear ${req.user.username || 'Guest'},</p>
+            <p>Thank you for your booking! Here are your booking details:</p>
+            <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <ul style="list-style: none; padding: 0;">
+                <li style="margin: 10px 0;"><strong>Booking ID:</strong> ${
+                  booking._id
+                }</li>
+                <li style="margin: 10px 0;"><strong>Hotel Name:</strong> ${
+                  roomData.hotel.name
+                }</li>
+                <li style="margin: 10px 0;"><strong>Location:</strong> ${
+                  roomData.hotel.address
+                }</li>
+                <li style="margin: 10px 0;"><strong>Room Type:</strong> ${
+                  roomData.roomType
+                }</li>
+                <li style="margin: 10px 0;"><strong>Check-In:</strong> ${new Date(
+                  checkInDate,
+                ).toLocaleDateString()}</li>
+                <li style="margin: 10px 0;"><strong>Check-Out:</strong> ${new Date(
+                  checkOutDate,
+                ).toLocaleDateString()}</li>
+                <li style="margin: 10px 0;"><strong>Guests:</strong> ${guests}</li>
+                <li style="margin: 10px 0;"><strong>Total Amount:</strong> ${
+                  process.env.CURRENCY || '$'
+                }${booking.totalPrice}</li>
+              </ul>
+            </div>
+            <p>We look forward to welcoming you!</p>
+            <p>If you need to make changes, feel free to contact us.</p>
+            <p style="color: #6b7280; font-size: 12px; margin-top: 30px;">This is an automated email. Please do not reply.</p>
+          </div>
+          `,
+        };
+        await transporter.sendMail(mailOptions);
+      } catch (emailError) {
+        // Email error shouldn't prevent booking creation
+      }
+    }
+
+    res.json({success: true, message: 'Booking created successfully'});
   } catch (error) {
-    res.json({success: false, message: 'failed to create Booking  '});
+    res.json({
+      success: false,
+      message: error.message || 'Failed to create booking',
+    });
   }
 };
 
 // API to get all bookings for a particular user => GET /api/bookings/user
 export const getUserBookings = async (req, res) => {
   try {
-    const user = req.user._id;
+    const user = req.user._id.toString();
     const bookings = await Booking.find({user})
       .populate('hotel room')
       .sort({createdAt: -1});
     res.json({success: true, bookings});
   } catch (error) {
-    res.json({success: false, message: 'failed to fetch bookings '});
+    res.json({
+      success: false,
+      message: error.message || 'failed to fetch bookings',
+    });
   }
 };
 
