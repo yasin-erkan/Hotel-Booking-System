@@ -6,6 +6,7 @@ import {fileURLToPath} from 'url';
 import connectDB from './configs/db.js';
 import {clerkMiddleware} from '@clerk/express';
 import clerkWebhooks from './controllers/clerkWebHooks.js';
+import {stripeWebHooks} from './controllers/stripeWebhhok.js';
 import userRouter from './routes/userRoutes.js';
 import hotelRouter from './routes/hotelRoutes.js';
 import connectCloudinary from './configs/cloudinary.js';
@@ -38,6 +39,13 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
+
+// API to listen to Stripe Webhooks
+app.post(
+  '/api/stripe',
+  express.raw({type: 'application/json'}),
+  stripeWebHooks,
+);
 
 // Security headers
 app.use((req, res, next) => {
@@ -85,9 +93,10 @@ app.use((err, req, res, next) => {
   console.error('Error:', err.message);
   res.status(err.status || 500).json({
     success: false,
-    message: process.env.NODE_ENV === 'production' 
-      ? 'Internal server error' 
-      : err.message,
+    message:
+      process.env.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
   });
 });
 
