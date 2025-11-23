@@ -13,7 +13,10 @@ if (!PUBLISHABLE_KEY) {
 }
 
 createRoot(document.getElementById('root')).render(
-  <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+  <ClerkProvider 
+    publishableKey={PUBLISHABLE_KEY}
+    telemetry={false}
+  >
     <BrowserRouter>
       <AppProvider>
         <App />
