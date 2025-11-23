@@ -9,18 +9,42 @@ const Dashboard = () => {
     totalBookings: 0,
     totalRevenue: 0,
   });
+  const [loading, setLoading] = useState(true);
+  
   const fetchDashBoardData = async () => {
     try {
+      setLoading(true);
       const {data} = await axios.get('/api/bookings/hotel', {
         headers: {Authorization: `Bearer ${await getToken()}`},
       });
+      console.log('Dashboard API response:', data);
       if (data.success) {
-        setDashboardData(data.dashboardData);
+        const dashboardData = data.dashboardData || {
+          bookings: [],
+          totalBookings: 0,
+          totalRevenue: 0,
+        };
+        console.log('Setting dashboard data:', dashboardData);
+        setDashboardData(dashboardData);
       } else {
-        toast.error(data.message);
+        console.warn('Dashboard API returned success:false', data);
+        toast.error(data.message || 'Failed to fetch dashboard data');
+        setDashboardData({
+          bookings: [],
+          totalBookings: 0,
+          totalRevenue: 0,
+        });
       }
     } catch (error) {
-      toast.error(error.message);
+      console.error('Dashboard fetch error:', error);
+      toast.error(error.response?.data?.message || error.message || 'Failed to fetch dashboard data');
+      setDashboardData({
+        bookings: [],
+        totalBookings: 0,
+        totalRevenue: 0,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -79,6 +103,19 @@ const Dashboard = () => {
     ],
     [dashboardData.totalBookings, dashboardData.totalRevenue, currency],
   );
+
+  if (loading) {
+    return (
+      <section className="space-y-12 py-10">
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
+            <p className="mt-4 text-sm text-slate-500">Loading dashboard data...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-12 py-10">
@@ -204,11 +241,18 @@ const Dashboard = () => {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-slate-200 bg-slate-50/60 py-12 text-center text-slate-400">
-            <img
-              src={assets.emptyStateIllustration}
-              alt="No bookings"
+            <svg
               className="h-24 w-24 opacity-80"
-            />
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
             <p className="text-sm font-medium">No recent bookings yet.</p>
             <span className="text-xs text-slate-400">
               New reservations will appear here as soon as they come in.
