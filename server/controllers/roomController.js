@@ -1,10 +1,12 @@
 import Hotel from '../models/Hotel.js';
 import Room from '../models/Room.js';
 import {v2 as cloudinary} from 'cloudinary';
+import {ensureConnection} from '../configs/db.js';
 
 // API to create a new room for a hotel
 export const createRoom = async (req, res) => {
   try {
+    await ensureConnection();
     const {roomType, pricePerNight, amenities} = req.body;
     const auth = await req.auth();
     const hotel = await Hotel.findOne({owner: auth.userId});
@@ -38,6 +40,7 @@ export const createRoom = async (req, res) => {
 // API to create all rooms
 export const getRooms = async (req, res) => {
   try {
+    await ensureConnection();
     const rooms = await Room.find({isAvailable: true})
       .populate({
         path: 'hotel',
@@ -56,6 +59,7 @@ export const getRooms = async (req, res) => {
 //API to get All rooms for a definite hotel
 export const getOwnerRooms = async (req, res) => {
   try {
+    await ensureConnection();
     const auth = await req.auth();
     const hotelData = await Hotel.findOne({owner: auth.userId});
     if (!hotelData) {
@@ -73,6 +77,7 @@ export const getOwnerRooms = async (req, res) => {
 //API to toggle availability of a definite room
 export const toggleRoomAvailability = async (req, res) => {
   try {
+    await ensureConnection();
     const {roomId} = req.body;
     const roomData = await Room.findById(roomId);
     if (!roomData) {

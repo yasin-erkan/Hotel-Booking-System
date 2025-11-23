@@ -1,5 +1,8 @@
+import {ensureConnection} from '../configs/db.js';
+
 export const getUserData = async (req, res) => {
   try {
+    await ensureConnection();
     const role = req.user.role;
     const recentSearchedCities = req.user.recentSearchedCities;
     res.json({success: true, role, recentSearchedCities});
@@ -12,6 +15,7 @@ export const getUserData = async (req, res) => {
 
 export const storeRecentSearchedCities = async (req, res) => {
   try {
+    await ensureConnection();
     const {recentSearchedCity} = req.body;
     const user = req.user;
     if (user.recentSearchedCities.length < 3) {

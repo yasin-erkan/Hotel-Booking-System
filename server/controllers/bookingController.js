@@ -2,10 +2,12 @@ import Booking from '../models/Booking.js';
 import Room from '../models/Room.js';
 import Hotel from '../models/Hotel.js';
 import transporter from '../configs/nodeMailer.js';
+import {ensureConnection} from '../configs/db.js';
 
 // Utility function: Check existing bookings in database
 export const checkAvailability = async ({checkInDate, checkOutDate, room}) => {
   try {
+    await ensureConnection();
     const bookings = await Booking.find({
       checkInDate: {$lte: checkOutDate},
       checkOutDate: {$gte: checkInDate},
@@ -22,6 +24,7 @@ export const checkAvailability = async ({checkInDate, checkOutDate, room}) => {
 // ! POST /api/bookings/check-availability
 export const checkAvailabilityAPI = async (req, res) => {
   try {
+    await ensureConnection();
     const {room, checkInDate, checkOutDate} = req.body;
     const isAvailable = await checkAvailability({
       room,
@@ -38,6 +41,7 @@ export const checkAvailabilityAPI = async (req, res) => {
 
 export const createBooking = async (req, res) => {
   try {
+    await ensureConnection();
     // first reach info and user on the body of request coming from client side
     const {room, checkInDate, checkOutDate, guests, userEmail} = req.body;
 
@@ -152,6 +156,7 @@ export const createBooking = async (req, res) => {
 // API to get all bookings for a particular user => GET /api/bookings/user
 export const getUserBookings = async (req, res) => {
   try {
+    await ensureConnection();
     const user = req.user._id.toString();
     const bookings = await Booking.find({user})
       .populate('hotel room')
@@ -167,6 +172,7 @@ export const getUserBookings = async (req, res) => {
 
 export const getHotelBookings = async (req, res) => {
   try {
+    await ensureConnection();
     const auth = await req.auth();
     const hotel = await Hotel.findOne({owner: auth.userId});
     if (!hotel) {
